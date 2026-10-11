@@ -146,6 +146,31 @@ class TypewriterTest < ApplicationSystemTestCase
     assert_selector ".page__body", text: "the third try"
   end
 
+  test "full page fills the screen with paper while writing and marking up" do
+    visit paper_draft_path(papers(:letter), drafts(:letter_second))
+    find(".fullscreen-toggle[title='Full screen']").click
+
+    assert_selector "html.fullscreen"
+    assert_no_selector ".masthead"
+    assert_selector ".fullscreen-toggle[aria-pressed=true][title='Leave full screen']"
+    page.save_screenshot(ENV["SCREENSHOT_DIR"] + "/markup.png") if ENV["SCREENSHOT_DIR"]
+    assert_operator find(".tray").rect.x, :<, find(".page").rect.x + 40, "the tray floats on the left, over the paper"
+
+    click_on "Write draft 3"
+    assert_selector "html.fullscreen"
+    page.save_screenshot(ENV["SCREENSHOT_DIR"] + "/writing.png") if ENV["SCREENSHOT_DIR"]
+
+    find(".fullscreen-toggle").click
+    assert_no_selector "html.fullscreen"
+    assert_selector ".masthead"
+
+    # The desk keeps its desk.
+    find(".fullscreen-toggle").click
+    execute_script "Turbo.visit(#{papers_path.to_json})"
+    assert_selector ".listing"
+    assert_no_selector "html.fullscreen"
+  end
+
   private
     def assert_selected(text)
       Timeout.timeout(Capybara.default_max_wait_time) do

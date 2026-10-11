@@ -10,6 +10,7 @@
     </nav>
 
     <div class="draft__actions">
+      <%= render "papers/drafts/fullscreen" %>
       <% if @draft.published? %>
         <%= link_to "Published", paper_path(@paper), class: "draft__status" %>
         <%= button_to "Unpublish", paper_publication_path(@paper), method: :delete, class: "button button--quiet", form: { data: { offline: "publication", offline_title: @draft.title } } %>

@@ -204,6 +204,40 @@ kbd {
   }
 }
 
+/* Full page: corners pointing out to fill the screen, in to leave it. */
+.fullscreen-toggle {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  color: var(--ink-faint);
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--ink);
+    background: color-mix(in srgb, var(--ink) 6%, transparent);
+  }
+}
+
+.fullscreen-toggle__icon {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fullscreen-toggle[aria-pressed="true"] .fullscreen-toggle__icon--enter,
+.fullscreen-toggle:not([aria-pressed="true"]) .fullscreen-toggle__icon--leave {
+  display: none;
+}
+
 /* A page. It's its own container so type, padding and marks all scale
  * with the page width: the layout of a page never reflows, only grows. */
 
@@ -460,6 +494,23 @@ input.page__author::placeholder {
   gap: 0.5rem;
 }
 
+/* On a phone, the buttons first and the keys underneath. */
+@media (max-width: 600px) {
+  .typewriter__footer {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 0.6rem;
+  }
+
+  .typewriter__actions {
+    justify-content: flex-end;
+  }
+
+  .typewriter__keys {
+    text-align: center;
+  }
+}
+
 /* Room below the last line so it can sit level with the eye. */
 .writing .main {
   padding-bottom: 40vh;
@@ -684,6 +735,17 @@ input.page__author::placeholder {
   text-align: center;
 }
 
+.tray__icon {
+  display: none;
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .tray__color {
   width: 1.1rem;
   height: 1.1rem;
@@ -715,6 +777,93 @@ input.page__author::placeholder {
 
   .tray__group {
     flex-direction: row;
+  }
+}
+
+/* Full page: the desk goes and the paper fills the screen. On a big screen
+ * the page grows too; marks are in page units, so they grow with it. */
+
+.fullscreen {
+  --page-width: clamp(760px, 65vw, 1000px);
+  background: var(--paper);
+
+  .masthead {
+    display: none;
+  }
+
+  .main {
+    padding-top: 1.25rem;
+  }
+
+  .page {
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .typewriter__footer {
+    background: linear-gradient(to bottom, transparent, var(--paper) 35%);
+  }
+
+  .desk--split .desk__page--previous {
+    opacity: 0.7;
+  }
+
+  /* The pen tray floats over the paper on the left: a column of icons,
+   * narrow enough to sit in the page's margin on a phone. */
+  .tray {
+    left: 0.75rem;
+    top: 50%;
+    bottom: auto;
+    translate: 0 -50%;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem;
+    background: var(--paper);
+    border-radius: 10px;
+    box-shadow:
+      0 1px 2px rgb(60 50 30 / 0.12),
+      0 8px 24px -8px rgb(60 50 30 / 0.35);
+  }
+
+  .tray__group,
+  .tray__group:has(.tray__color) {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+  }
+
+  .tray__tool {
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    border-radius: 7px;
+  }
+
+  .tray__icon {
+    display: block;
+  }
+
+  .tray__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .tray__color {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  @media (max-width: 600px) {
+    .tray {
+      left: 0.2rem;
+    }
   }
 }
 
