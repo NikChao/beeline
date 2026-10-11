@@ -13,16 +13,16 @@
     <%= yield :head %>
 
     <%= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-    <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
+    <link rel="icon" href="<%= root_path %>icon.png" type="image/png">
+    <link rel="icon" href="<%= root_path %>icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="<%= root_path %>icon.png">
 
     <%= stylesheet_link_tag "lexxy", "data-turbo-track": "reload" %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="<%= content_for(:body_class) %>" data-controller="offline" data-action="online@window->offline#online offline@window->offline#offline">
+  <body class="<%= content_for(:body_class) %>" data-controller="offline" data-offline-worker-value="<%= pwa_service_worker_path(format: :js) %>" data-offline-scope-value="<%= root_path %>" data-action="online@window->offline#online offline@window->offline#offline">
     <header class="masthead">
       <%= link_to "Beeline", root_path, class: "masthead__name" %>
 

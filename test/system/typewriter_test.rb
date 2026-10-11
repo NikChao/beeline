@@ -35,6 +35,7 @@ class TypewriterTest < ApplicationSystemTestCase
     body.click
     body.send_keys "plain bold"
     body.send_keys [ :shift, :left ], [ :shift, :left ], [ :shift, :left ], [ :shift, :left ]
+    assert_selected "bold"
     body.send_keys [ :control, "b" ]
     body.send_keys "x"
     body.send_keys [ :control, "x" ]
@@ -103,6 +104,12 @@ class TypewriterTest < ApplicationSystemTestCase
   end
 
   private
+    def assert_selected(text)
+      Timeout.timeout(Capybara.default_max_wait_time) do
+        sleep 0.05 until page.evaluate_script("window.getSelection().toString()") == text
+      end
+    end
+
     def tap(element, at:)
       page.driver.browser.action.move_to(element.native, *offset(element, at)).click.perform
     end

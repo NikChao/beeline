@@ -6,7 +6,7 @@ const {
   KEY_BACKSPACE_COMMAND, KEY_DELETE_COMMAND, DELETE_CHARACTER_COMMAND, DELETE_WORD_COMMAND, DELETE_LINE_COMMAND,
   REMOVE_TEXT_COMMAND, CUT_COMMAND, UNDO_COMMAND, REDO_COMMAND,
   CONTROLLED_TEXT_INSERTION_COMMAND, INSERT_PARAGRAPH_COMMAND, INSERT_LINE_BREAK_COMMAND, PASTE_COMMAND, DROP_COMMAND,
-  $getSelection, $isRangeSelection, $createParagraphNode, $createTextNode
+  $getSelection, $isRangeSelection, $setSelection, $createRangeSelectionFromDom, $createParagraphNode, $createTextNode
 } = Lexical
 
 // Anything that would take letters off the page.
@@ -51,7 +51,7 @@ export default class extends Controller {
       // Ctrl+B/I/U everywhere, including macOS where Lexical only listens for ⌘.
       event.preventDefault()
       event.stopPropagation()
-      this.editorTarget.editor.dispatchCommand(FORMAT_TEXT_COMMAND, HOTKEY_FORMATS[key])
+      this.#format(HOTKEY_FORMATS[key])
     }
   }
 
@@ -150,6 +150,18 @@ export default class extends Controller {
     return Object.entries(transforms)
       .filter(([ type ]) => editor._nodes.has(type))
       .map(([ type, transform ]) => editor.registerNodeTransform(editor._nodes.get(type).klass, transform))
+  }
+
+  // Lexical syncs its selection from the DOM a beat late; a quick select-then-format
+  // would otherwise format the stale caret instead of the selected words.
+  #format(format) {
+    const editor = this.editorTarget.editor
+
+    editor.update(() => {
+      const selection = $createRangeSelectionFromDom(window.getSelection(), editor)
+      if (selection) $setSelection(selection)
+      editor.dispatchCommand(FORMAT_TEXT_COMMAND, format)
+    })
   }
 
   #refuse(event) {

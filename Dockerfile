@@ -21,7 +21,11 @@ RUN apt-get update -qq && \
     rm -rf /var/lib/apt/lists /var/cache/apt/archives
 
 # Set production environment variables and enable jemalloc for reduced memory usage and latency.
+# Bake the sub-path into compiled assets, and serve the app from it.
+ARG RAILS_RELATIVE_URL_ROOT=""
+
 ENV RAILS_ENV="production" \
+    RAILS_RELATIVE_URL_ROOT="${RAILS_RELATIVE_URL_ROOT}" \
     BUNDLE_DEPLOYMENT="1" \
     BUNDLE_PATH="/usr/local/bundle" \
     BUNDLE_WITHOUT="development" \

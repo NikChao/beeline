@@ -1,5 +1,5 @@
 # A paper to look at on a fresh desk: two drafts, the first marked up, the second published.
-return if Paper.exists?
+return if Rails.env.production? || Paper.exists?
 
 paper = Paper.write \
   title: "On writing slowly",

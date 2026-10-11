@@ -4,6 +4,7 @@ import { Controller } from "@hotwired/stimulus"
 // and shows when there are pages waiting to be sent.
 export default class extends Controller {
   static targets = [ "status", "count" ]
+  static values = { worker: String, scope: String }
 
   async connect() {
     if (!("serviceWorker" in navigator)) return
@@ -12,7 +13,7 @@ export default class extends Controller {
     navigator.serviceWorker.addEventListener("message", this.received)
     this.#reflectConnection()
 
-    await navigator.serviceWorker.register("/service-worker.js")
+    await navigator.serviceWorker.register(this.workerValue, { scope: this.scopeValue })
     this.#post({ type: "warm", urls: this.#pagesToKeep })
     this.#post({ type: navigator.onLine ? "sync" : "outbox" })
   }

@@ -2,5 +2,8 @@
 
 require_relative "config/environment"
 
-run Rails.application
+# Served from a sub-path (e.g. bee.local/write) when RAILS_RELATIVE_URL_ROOT is set.
+map Rails.application.config.relative_url_root.presence || "/" do
+  run Rails.application
+end
 Rails.application.load_server

@@ -6,10 +6,12 @@
 // IndexedDB and is replayed, in order, as soon as the host answers again.
 
 const VERSION = "v1"
+const BASE = new URL(self.registration.scope).pathname.replace(/\/$/, "") // "" or e.g. "/write"
 const PAGES = `beeline-pages-${VERSION}`
 const ASSETS = `beeline-assets-${VERSION}`
 
-const SHELL = [ "/", "/papers", "/papers/new", "/outbox" ]
+const SHELL = [ "/", "/papers", "/papers/new", "/outbox" ].map(path => BASE + path)
+const ASSET_URLS = new RegExp(`${BASE}/assets/[\\w\\-./]+\\.(?:js|css|ttf|woff2?|png|svg)`, "g")
 const QUEUEABLE = [
   /^\/papers$/,
   /^\/papers\/\d+\/drafts$/,
@@ -55,15 +57,16 @@ self.addEventListener("sync", event => {
 self.addEventListener("fetch", event => {
   const { request } = event
   const url = new URL(request.url)
-  if (url.origin !== location.origin) return
+  if (url.origin !== location.origin || !url.pathname.startsWith(BASE)) return
+  const path = url.pathname.slice(BASE.length)
 
   if (request.method === "GET") {
-    if (url.pathname.startsWith("/assets/")) {
+    if (path.startsWith("/assets/")) {
       event.respondWith(asset(request))
     } else if (request.headers.get("Accept")?.includes("text/html")) {
       event.respondWith(page(request, event))
     }
-  } else if (request.method === "POST" && QUEUEABLE.some(pattern => pattern.test(url.pathname))) {
+  } else if (request.method === "POST" && QUEUEABLE.some(pattern => pattern.test(path))) {
     event.respondWith(save(request, event))
   }
 })
@@ -72,7 +75,7 @@ self.addEventListener("fetch", event => {
 
 async function page(request, event) {
   // The outbox is one page however it's reached (?queued, ?unavailable).
-  const ignoreSearch = new URL(request.url).pathname === "/outbox"
+  const ignoreSearch = new URL(request.url).pathname === `${BASE}/outbox`
   const cached = caches.match(request, { ignoreVary: true, ignoreSearch, cacheName: PAGES })
 
   const network = fetch(request).then(async response => {
@@ -90,7 +93,7 @@ async function page(request, event) {
       delay(PAGE_TIMEOUT).then(async () => (await cached) || network)
     ])
   } catch {
-    return (await cached) || (ignoreSearch ? Response.error() : Response.redirect("/outbox?unavailable=1", 303))
+    return (await cached) || (ignoreSearch ? Response.error() : Response.redirect(`${BASE}/outbox?unavailable=1`, 303))
   }
 }
 
@@ -137,7 +140,7 @@ async function cacheAssets(urls) {
 }
 
 function assetUrlsIn(text) {
-  return [ ...new Set(text.match(/\/assets\/[\w\-./]+\.(?:js|css|ttf|woff2?|png|svg)/g) || []) ]
+  return [ ...new Set(text.match(ASSET_URLS) || []) ]
 }
 
 // Saving
@@ -164,7 +167,7 @@ async function save(request, event) {
     if (entry.contentType.includes("json")) {
       return new Response(JSON.stringify({ queued: true }), { status: 202, headers: { "Content-Type": "application/json" } })
     } else {
-      return Response.redirect("/outbox?queued=1", 303)
+      return Response.redirect(`${BASE}/outbox?queued=1`, 303)
     }
   }
 }
@@ -181,7 +184,7 @@ async function entryFor(request) {
     entry.kind = "publication"
   } else {
     const params = new URLSearchParams(body)
-    entry.kind = url.pathname === "/papers" ? "page" : "draft"
+    entry.kind = url.pathname === `${BASE}/papers` ? "page" : "draft"
     entry.title = params.get("draft[title]")
     entry.publish = params.has("publish")
   }
@@ -231,7 +234,7 @@ async function flush() {
 }
 
 async function freshToken() {
-  const response = await fetchWithin(PAGE_TIMEOUT, new Request("/papers/new", { headers: { Accept: "text/html" }, cache: "no-store" }))
+  const response = await fetchWithin(PAGE_TIMEOUT, new Request(`${BASE}/papers/new`, { headers: { Accept: "text/html" }, cache: "no-store" }))
   const token = (await response.text()).match(/<meta name="csrf-token" content="([^"]+)"/)?.[1]
   if (!token) throw new Error("No CSRF token")
   return token
