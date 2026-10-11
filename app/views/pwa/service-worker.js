@@ -5,12 +5,12 @@
 // Pages: network first, falling back to the last copy we saw.
 // Assets: digested, so cache first, forever.
 
-const VERSION = "v2"
+const VERSION = "v3"
 const BASE = new URL(self.registration.scope).pathname.replace(/\/$/, "") // "" or e.g. "/write"
 const PAGES = `beeline-pages-${VERSION}`
 const ASSETS = `beeline-assets-${VERSION}`
 
-const SHELL = [ "/", "/papers", "/papers/new", "/outbox" ].map(path => BASE + path)
+const SHELL = [ "/", "/shelf", "/papers", "/papers/new", "/outbox" ].map(path => BASE + path)
 const ASSET_URLS = new RegExp(`${BASE}/assets/[\\w\\-./]+\\.(?:js|css|ttf|woff2?|png|svg)`, "g")
 const PAGE_TIMEOUT = 4000
 

@@ -1,8 +1,14 @@
 require "test_helper"
 
 class PapersControllerTest < ActionDispatch::IntegrationTest
-  test "shelf lists only published papers" do
+  test "locally, Beeline opens on the desk" do
     get root_path
+
+    assert_select ".listing__heading", "On your desk"
+  end
+
+  test "shelf lists only published papers" do
+    get shelf_path
 
     assert_response :success
     assert_select ".listing__title", text: "On paper"

@@ -1,0 +1,48 @@
+<main class="landing__page">
+  <header class="landing__hero">
+    <img class="landing__icon" src="<%= root_path %>icon.svg" alt="" width="72" height="72">
+    <h1 class="landing__name">Beeline</h1>
+    <p class="landing__tagline">A calm place to type. No toolbar, no backspace: the page, a red pen, and the next draft.</p>
+
+    <div class="landing__actions">
+      <% if @download %>
+        <%= link_to "Download for Mac", "#{root_path}downloads/#{File.basename(@download)}", class: "button button--primary landing__button", download: "Beeline.dmg" %>
+      <% end %>
+      <%= link_to "Write in your browser", shelf_path, class: "button landing__button" %>
+    </div>
+
+    <% if @download %>
+      <p class="landing__fine">For macOS 14 Sonoma or later, on Apple silicon and Intel.</p>
+    <% end %>
+  </header>
+
+  <figure class="landing__sheet">
+    <%= image_tag "landing/markup.png", alt: "A typed draft, marked up with a yellow marker, a red pen and a note in the margin", width: 1440, height: 900 %>
+  </figure>
+
+  <ol class="landing__steps">
+    <li class="landing__step">
+      <h2 class="landing__step-title">Type it once.</h2>
+      <p>Keys go down and stay down. Headings, lists, bold and italic, and nothing to fiddle with.</p>
+    </li>
+    <li class="landing__step">
+      <h2 class="landing__step-title">Mark it up.</h2>
+      <p>Strike a phrase in yellow, circle a thought in red, put a word in the margin.</p>
+    </li>
+    <li class="landing__step">
+      <h2 class="landing__step-title">Type it again, better.</h2>
+      <p>The last draft sits beside the new one. When it's ready, put it on the shelf.</p>
+    </li>
+  </ol>
+
+  <figure class="landing__sheet landing__sheet--wide">
+    <%= image_tag "landing/redraft.png", alt: "The marked-up draft beside the next draft, being typed", width: 1440, height: 900 %>
+  </figure>
+
+  <footer class="landing__footer">
+    <p>Works offline. Whatever you type is kept on your device and sent along when there's a connection.</p>
+    <% if @download %>
+      <p class="landing__fine">Opening the Mac app the first time, macOS may say it can't check it for malicious software: open <strong>System Settings ▸ Privacy &amp; Security</strong> and choose <strong>Open Anyway</strong>.</p>
+    <% end %>
+  </footer>
+</main>

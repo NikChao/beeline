@@ -52,3 +52,7 @@
 
 # The iOS app isn't part of the web image.
 /ios
+
+# Local builds of the apps, and the Mac app download (mounted in on the server).
+/build
+/public/downloads

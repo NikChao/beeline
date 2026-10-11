@@ -1,6 +1,8 @@
 # Navigation rules for the Hotwire Native app. The app bundles a copy
 # (ios/Beeline/path-configuration.json) and loads this one over it.
 class ConfigurationsController < ApplicationController
+  allow_unauthenticated_access
+
   def ios_v1
     render json: {
       settings: {},

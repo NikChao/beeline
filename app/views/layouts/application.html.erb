@@ -26,20 +26,28 @@
   <%= tag.body class: [ ("native" if hotwire_native_app?), content_for(:body_class) ], data: {
         controller: "sync",
         sync_outbox_value: outbox_path,
-        sync_shelf_value: root_path,
+        sync_shelf_value: shelf_path,
+        sync_sign_in_value: new_session_path,
         sync_desk_value: papers_path,
         sync_worker_value: (pwa_service_worker_path(format: :js) unless hotwire_native_app?),
         sync_scope_value: root_path,
-        action: "submit->sync#submit outbox:changed@window->sync#refresh online@window->sync#sync visibilitychange@document->sync#resume"
+        action: "submit->sync#submit outbox:changed@window->sync#refresh outbox:unauthorized@window->sync#unauthorized online@window->sync#sync visibilitychange@document->sync#resume"
       } do %>
     <% unless hotwire_native_app? %>
       <header class="masthead">
         <%= link_to "Beeline", root_path, class: "masthead__name" %>
 
         <nav class="masthead__nav">
-          <%= link_to "Shelf", root_path, class: "masthead__link", aria: { current: current_page?(root_path) || current_page?(shelf_path) ? "page" : nil } %>
-          <%= link_to "Desk", papers_path, class: "masthead__link", aria: { current: current_page?(papers_path) ? "page" : nil } %>
+          <%= link_to "Shelf", shelf_path, class: "masthead__link", aria: { current: current_page?(shelf_path) ? "page" : nil } %>
+          <%= link_to "Desk", papers_path, class: "masthead__link", aria: { current: current_page?(papers_path) || (!Rails.configuration.x.landing && current_page?(root_path)) ? "page" : nil } %>
           <%= link_to "New page", new_paper_path, class: "masthead__link masthead__link--new" %>
+          <% if authentication_required? %>
+            <% if authenticated? %>
+              <%= button_to "Sign out", session_path, method: :delete, class: "masthead__link masthead__sign-out", form_class: "masthead__form" %>
+            <% else %>
+              <%= link_to "Sign in", new_session_path, class: "masthead__link" %>
+            <% end %>
+          <% end %>
         </nav>
       </header>
     <% end %>

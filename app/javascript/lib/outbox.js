@@ -41,7 +41,10 @@ async function send() {
 
       const response = await deliver(entry)
 
-      if (response.ok) {
+      if (response.status === 401) {
+        window.dispatchEvent(new CustomEvent("outbox:unauthorized"))
+        break
+      } else if (response.ok) {
         await transact("readwrite", store => store.delete(entry.id))
         sent.set(entry.id, response)
       } else if (response.status >= 400 && response.status < 500) {

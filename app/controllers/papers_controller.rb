@@ -1,8 +1,10 @@
 class PapersController < ApplicationController
-  before_action :set_paper, only: %i[ show destroy ]
+  allow_unauthenticated_access only: :show # published pages are for reading
+  before_action :set_paper, only: :show
+  before_action :set_writable_paper, only: :destroy
 
   def index
-    @papers = Paper.latest.includes(:latest_draft, :publication)
+    @papers = writable_papers.latest.includes(:latest_draft, :publication)
   end
 
   def show
@@ -18,7 +20,8 @@ class PapersController < ApplicationController
   end
 
   def create
-    @draft = Draft.saved_with(client_key) || Paper.write(draft_params.merge(client_key: client_key)).latest_draft
+    @draft = Draft.where(paper: writable_papers).saved_with(client_key) ||
+      writable_papers.write(draft_params.merge(client_key: client_key)).latest_draft
     @paper = @draft.paper
     remember_author
 
@@ -39,8 +42,14 @@ class PapersController < ApplicationController
   end
 
   private
+    # Anyone may read a published paper; anything else sends them to the
+    # drafts, which are only for its writer.
     def set_paper
       @paper = Paper.find(params[:id])
+    end
+
+    def set_writable_paper
+      @paper = writable_papers.find(params[:id])
     end
 
     def draft_params

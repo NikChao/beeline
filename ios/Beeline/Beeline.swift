@@ -10,10 +10,11 @@ enum Beeline {
         return url
     }()
 
-    static let shelfURL = rootURL
+    static let shelfURL = rootURL.appending(path: "shelf")
     static let deskURL = rootURL.appending(path: "papers")
     static let newPageURL = rootURL.appending(path: "papers/new")
     static let outboxURL = rootURL.appending(path: "outbox")
+    static let signInURL = rootURL.appending(path: "session/new")
     static let pathConfigurationURL = rootURL.appending(path: "configurations/ios_v1.json")
 
     /// The same warm desk and dark ink as the web app.

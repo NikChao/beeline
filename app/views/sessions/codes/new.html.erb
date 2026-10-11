@@ -1,0 +1,18 @@
+<% content_for :title, "Check your email" %>
+
+<section class="sign-in">
+  <h1 class="sign-in__heading">Check your email</h1>
+  <p class="sign-in__lede">If <strong><%= @email_address %></strong> can sign in, a six-digit code is on its way. It works for 3 hours.</p>
+
+  <% if alert %>
+    <p class="sign-in__alert"><%= alert %></p>
+  <% end %>
+
+  <%= form_with url: session_code_path, class: "sign-in__form" do |form| %>
+    <%= form.text_field :code, class: "sign-in__field sign-in__field--code", placeholder: "000000", required: true, autofocus: true,
+          inputmode: "numeric", autocomplete: "one-time-code", pattern: "[0-9 ]{6,7}", maxlength: 7, aria: { label: "Code" } %>
+    <%= form.button "Sign in", class: "button button--primary", data: { turbo_submits_with: "Signing in…" } %>
+  <% end %>
+
+  <p class="sign-in__aside"><%= link_to "Use a different email, or send a new code", new_session_path %></p>
+</section>

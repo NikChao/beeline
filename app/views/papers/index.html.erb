@@ -24,4 +24,10 @@
   <% else %>
     <p class="listing__empty">Your desk is clear. <%= link_to "Start a new page", new_paper_path %>.</p>
   <% end %>
+
+  <% if hotwire_native_app? && authentication_required? && authenticated? %>
+    <footer class="listing__footer">
+      <%= button_to "Sign out of #{Current.user.email_address}", session_path, method: :delete, class: "button button--quiet" %>
+    </footer>
+  <% end %>
 </section>

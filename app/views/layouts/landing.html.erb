@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Beeline · A calm place to type</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="A calm place to type. No toolbar, no backspace: the page, a red pen, and the next draft.">
+    <meta name="theme-color" content="#f4efe3">
+    <link rel="icon" href="<%= root_path %>icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="<%= root_path %>icon.png">
+    <%= stylesheet_link_tag :app %>
+  </head>
+
+  <body class="landing">
+    <%= yield %>
+  </body>
+</html>

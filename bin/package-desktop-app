@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Build the Mac app (Mac Catalyst) for a server, as a disk image to download.
+#
+#   bin/package-desktop-app https://your-server.example
+#   bin/package-desktop-app https://your-server.example --upload app@your-server
+#
+# --upload copies it to ~/downloads on the server, which Kamal mounts at
+# /downloads; the landing page offers the newest one. Set SSH_KEY to use a
+# key other than your default.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+url=${1:?Usage: bin/package-desktop-app URL [--upload user@host]}
+upload=${3:-}
+
+xcodebuild -project ios/Beeline.xcodeproj -scheme Beeline -configuration Release \
+  -destination 'generic/platform=macOS,variant=Mac Catalyst' \
+  -derivedDataPath build/DerivedData -quiet \
+  CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM= BEELINE_URL="$url" build
+
+app=build/DerivedData/Build/Products/Release-maccatalyst/Beeline.app
+version=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$app/Contents/Info.plist")
+dmg="build/Beeline-$version-$(date +%Y%m%d%H%M).dmg"
+
+# A folder with the app and a shortcut to Applications: drag one onto the other.
+staging=$(mktemp -d)
+ditto "$app" "$staging/Beeline.app"
+ln -s /Applications "$staging/Applications"
+hdiutil create -volname Beeline -srcfolder "$staging" -ov -format UDZO -quiet "$dmg"
+rm -rf "$staging"
+echo "Built $dmg for $url"
+
+if [[ -n "$upload" ]]; then
+  ssh_options=(${SSH_KEY:+-i "$SSH_KEY"})
+  ssh "${ssh_options[@]}" "$upload" "mkdir -p ~/downloads"
+  scp -q "${ssh_options[@]}" "$dmg" "$upload:downloads/"
+  echo "Uploaded to $upload:downloads/$(basename "$dmg")"
+fi

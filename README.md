@@ -100,6 +100,54 @@ the app shows whatever the server sends.
 - To work on it, open `ios/Beeline.xcodeproj` and run the **My Mac (Mac
   Catalyst)** destination instead.
 
+## Local or prod
+
+One switch, `BEELINE_MODE`, decides what kind of Beeline you're running:
+
+- **`local`** (the default): no sign-in, and `/` opens straight on the desk.
+  For a home server, or your own machine.
+- **`prod`**: email sign-in, and a landing page at `/` with the Mac app
+  download. The shelf and published pages stay public; writing needs signing
+  in. Anyone can sign in with an email address, and each person's desk is
+  their own. Codes are emailed through [Resend](https://resend.com).
+
+## Deploying with Kamal
+
+`config/deploy.yml` puts Beeline on a server in prod mode, behind Kamal's proxy
+with a Let's Encrypt certificate. Kamal connects as a non-root `app` user;
+images go over SSH, so there's no registry to sign up for.
+
+Secrets live outside the repository (see `.kamal/secrets`):
+
+```sh
+mkdir -p ~/.config/beeline
+pbpaste > ~/.config/beeline/resend_api_key   # a Resend API key
+```
+
+Then:
+
+```sh
+bin/kamal setup    # the first time
+bin/kamal deploy   # after that
+```
+
+The server was prepared with a non-root `app` user (key-only, in the `docker`
+group, with sudo), root and password logins switched off, a firewall allowing
+only SSH, HTTP and HTTPS, fail2ban, and automatic security updates.
+
+### The Mac app download
+
+The landing page offers the newest `Beeline-*.dmg` in `~/downloads` on the
+server. Build one pointed at the server and upload it:
+
+```sh
+SSH_KEY=~/.ssh/your-key bin/package-desktop-app https://your-server --upload app@your-server
+```
+
+It's signed ad hoc, so macOS asks for confirmation the first time it's opened
+(System Settings ▸ Privacy & Security ▸ Open Anyway). Signing with a Developer
+ID and notarizing it removes that step.
+
 ## Serving from a sub-path
 
 To serve Beeline from a path like `example.com/write`, pass
@@ -116,5 +164,6 @@ Then proxy `/write/` to the container without stripping the prefix.
 
 - In browsers, opening pages offline needs a secure context (`localhost` or
   HTTPS). Saving offline works everywhere, plain http included.
-- There's no sign-in. Anyone who can reach the host can write and publish.
+- In local mode there's no sign-in: anyone who can reach the host can write
+  and publish. Use prod mode anywhere public.
 - Typeset in [Courier Prime](https://github.com/quoteunquoteapps/CourierPrime) (SIL OFL, see `app/assets/fonts/OFL.txt`).

@@ -51,7 +51,10 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 extension SceneDelegate: NavigatorDelegate {
     func visitableDidFailRequest(_ visitable: any Visitable, error: HotwireNativeError, retryHandler: RetryBlock?) {
         // Out of reach: open the copy kept on this device, if there is one.
-        if case .web = error,
+        // Signed out (on a server that wants sign-in): ask, then the page reloads.
+        if case .http(.client(.unauthorized)) = error {
+            tabBarController.activeNavigator.route(Beeline.signInURL)
+        } else if case .web = error,
            let page = visitable as? PageViewController,
            let html = PageCache.shared.page(for: visitable.initialVisitableURL) {
             page.showOffline(html, reconnect: retryHandler)

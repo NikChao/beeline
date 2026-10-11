@@ -1,5 +1,6 @@
 import CryptoKit
 import Foundation
+import WebKit
 
 /// Copies of pages kept on the device, so the app can open them when the
 /// server is out of reach. This only covers reading: saving offline is the
@@ -34,6 +35,12 @@ final class PageCache {
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 15)
         request.setValue("text/html", forHTTPHeaderField: "Accept")
         request.setValue(Self.userAgent, forHTTPHeaderField: "User-Agent")
+
+        // Signed in, as the app is: pages behind sign-in are kept too.
+        let cookies = await Task { @MainActor in await WKWebsiteDataStore.default().httpCookieStore.allCookies() }.value
+        for (field, value) in HTTPCookie.requestHeaderFields(with: cookies.filter { $0.domain == url.host() || url.host()?.hasSuffix($0.domain) == true }) {
+            request.setValue(value, forHTTPHeaderField: field)
+        }
 
         guard let (data, response) = try? await URLSession.shared.data(for: request),
               let response = response as? HTTPURLResponse,

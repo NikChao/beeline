@@ -1,0 +1,20 @@
+<% content_for :title, "Sign in" %>
+
+<section class="sign-in">
+  <h1 class="sign-in__heading">Sign in</h1>
+  <p class="sign-in__lede">We'll email you a code. No password to remember.</p>
+
+  <% if alert %>
+    <p class="sign-in__alert"><%= alert %></p>
+  <% end %>
+
+  <% unless Rails.configuration.x.email_delivery %>
+    <p class="sign-in__alert">This server can't send email yet, so codes won't arrive. (Set RESEND_API_KEY.)</p>
+  <% end %>
+
+  <%= form_with url: session_path, class: "sign-in__form" do |form| %>
+    <%= form.email_field :email_address, class: "sign-in__field", placeholder: "you@example.com", required: true, autofocus: true,
+          autocomplete: "email", autocapitalize: "off", aria: { label: "Email address" } %>
+    <%= form.button "Email me a code", class: "button button--primary", data: { turbo_submits_with: "Sending…" } %>
+  <% end %>
+</section>

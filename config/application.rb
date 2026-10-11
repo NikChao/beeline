@@ -21,6 +21,15 @@ module Beeline
     # These settings can be overridden in specific environments using the files
     # in config/environments, which are processed later.
     #
+    # BEELINE_MODE=local (the default): open to whoever can reach it, and
+    # straight to the desk, as on a home network.
+    # BEELINE_MODE=prod: a public server, with email sign-in and a landing page.
+    config.x.mode = ActiveSupport::StringInquirer.new(ENV.fetch("BEELINE_MODE", "local").downcase)
+    config.x.authentication = config.x.mode.prod?
+    config.x.landing = config.x.mode.prod?
+    config.x.host = ENV["BEELINE_HOST"]
+    config.x.email_delivery = true # production needs RESEND_API_KEY; see production.rb
+
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
   end

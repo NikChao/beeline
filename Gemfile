@@ -66,3 +66,5 @@ group :test do
 end
 
 gem "lexxy", "~> 1.0"
+
+gem "bcrypt", "~> 3.1"

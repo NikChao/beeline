@@ -7,6 +7,6 @@ module PaperScoped
 
   private
     def set_paper
-      @paper = Paper.find(params[:paper_id])
+      @paper = writable_papers.find(params[:paper_id])
     end
 end

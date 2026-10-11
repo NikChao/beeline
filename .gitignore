@@ -41,3 +41,6 @@
 xcuserdata/
 *.xcuserstate
 DerivedData/
+
+# Mac app builds, mounted in on the server
+/public/downloads/

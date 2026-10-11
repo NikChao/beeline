@@ -1,7 +1,20 @@
 Rails.application.routes.draw do
-  root "shelves#show"
+  # One address: www.beeline.ink redirects to beeline.ink (BEELINE_HOST).
+  constraints(->(request) { request.host == "www.#{Rails.configuration.x.host}" }) do
+    match "(*path)", to: redirect { |_, request| request.url.sub("://www.", "://") }, via: :all
+  end
 
+  # In prod, Beeline opens on the landing page; locally, straight to the desk.
+  root Rails.configuration.x.landing ? "landings#show" : "papers#index"
+
+  resource :landing, only: :show
   resource :shelf, only: :show
+
+  resource :session, only: %i[ new create destroy ] do
+    scope module: :sessions do
+      resource :code, only: %i[ new create ]
+    end
+  end
   resource :outbox, only: :show
 
   resources :papers, only: %i[ index show new create destroy ] do

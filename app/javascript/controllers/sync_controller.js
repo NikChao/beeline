@@ -9,7 +9,7 @@ const RETRY_EVERY = 30000
 // and are sent from there; this keeps the outbox moving whenever it can.
 export default class extends Controller {
   static targets = [ "status" ]
-  static values = { outbox: String, shelf: String, desk: String, worker: String, scope: String }
+  static values = { outbox: String, shelf: String, desk: String, signIn: String, worker: String, scope: String }
 
   connect() {
     this.#registerServiceWorker()
@@ -35,8 +35,16 @@ export default class extends Controller {
     const refused = items.filter(item => item.failed).length
 
     this.statusTarget.hidden = !items.length
-    this.statusTarget.textContent = refused ? `${refused} couldn't be saved` : `${items.length} waiting to sync`
-    this.statusTarget.classList.toggle("sync-status--trouble", refused > 0)
+    this.statusTarget.href = this.signedOut ? this.signInValue : this.outboxValue
+    this.statusTarget.textContent = this.signedOut ? `Sign in to sync ${items.length} waiting`
+      : refused ? `${refused} couldn't be saved` : `${items.length} waiting to sync`
+    this.statusTarget.classList.toggle("sync-status--trouble", refused > 0 || this.signedOut)
+  }
+
+  // The server wants a sign-in before it takes the outbox.
+  unauthorized() {
+    this.signedOut = true
+    this.refresh()
   }
 
   async submit(event) {

@@ -1,0 +1,202 @@
+/* The landing page: a sheet of good paper, and not much on it. */
+
+.landing {
+  background:
+    radial-gradient(ellipse at top, #fbf8f1 0%, transparent 60%),
+    #f4efe3;
+  color: var(--ink);
+}
+
+.landing__page {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: clamp(3rem, 10vh, 7rem) 1.5rem 4rem;
+}
+
+.landing__hero {
+  max-width: 34rem;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.landing__icon {
+  display: block;
+  margin: 0 auto 1.75rem;
+  border-radius: 22%;
+  box-shadow: 0 1px 1px rgb(60 50 30 / 0.06), 0 8px 24px -10px rgb(60 50 30 / 0.3);
+}
+
+.landing__name {
+  margin: 0;
+  font-family: var(--typescript);
+  font-size: clamp(2.6rem, 7vw, 3.75rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.05;
+}
+
+.landing__tagline {
+  margin: 1.25rem auto 0;
+  font-family: var(--book);
+  font-size: clamp(1.2rem, 2.6vw, 1.45rem);
+  line-height: 1.5;
+  color: var(--ink-soft);
+  text-wrap: balance;
+}
+
+.landing__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 2.25rem;
+}
+
+.landing__button {
+  padding: 0.7em 1.5em;
+  font-size: 1rem;
+}
+
+.landing__fine {
+  margin: 1rem 0 0;
+  color: var(--ink-faint);
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.landing__sheet {
+  margin: clamp(3.5rem, 9vh, 5.5rem) auto 0;
+  max-width: 880px;
+  transform: rotate(-0.6deg);
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 6px;
+    box-shadow:
+      0 1px 1px rgb(60 50 30 / 0.06),
+      0 24px 60px -24px rgb(60 50 30 / 0.35);
+  }
+}
+
+.landing__sheet--wide {
+  transform: rotate(0.5deg);
+}
+
+.landing__steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 2rem 2.5rem;
+  max-width: 880px;
+  margin: clamp(3.5rem, 9vh, 5.5rem) auto 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing__step {
+  p {
+    margin: 0.5rem 0 0;
+    font-family: var(--book);
+    font-size: 1.05rem;
+    line-height: 1.55;
+    color: var(--ink-soft);
+  }
+}
+
+.landing__step-title {
+  margin: 0;
+  font-family: var(--typescript);
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.landing__footer {
+  max-width: 34rem;
+  margin: clamp(3.5rem, 9vh, 5rem) auto 0;
+  text-align: center;
+  font-family: var(--book);
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+/* Signing in: the same calm, a narrower column. */
+
+.sign-in {
+  max-width: 26rem;
+  margin: 4rem auto 0;
+  text-align: center;
+}
+
+.sign-in__heading {
+  margin: 0;
+  font-family: var(--typescript);
+  font-size: 1.6rem;
+}
+
+.sign-in__lede,
+.sign-in__aside {
+  margin: 0.75rem 0 0;
+  font-family: var(--book);
+  font-size: 1.1rem;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.sign-in__aside {
+  margin-top: 2rem;
+  font-size: 0.95rem;
+}
+
+.sign-in__alert {
+  margin: 1.25rem 0 0;
+  color: var(--red);
+}
+
+.sign-in__form {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.sign-in__field {
+  width: 100%;
+  padding: 0.8em 1em;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--typescript);
+  font-size: 1.05rem;
+  text-align: center;
+  outline: none;
+
+  &:focus {
+    border-color: color-mix(in srgb, var(--ink) 40%, transparent);
+  }
+}
+
+.sign-in__field--code {
+  font-size: 1.6rem;
+  letter-spacing: 0.35em;
+}
+
+.masthead__form {
+  display: contents;
+}
+
+.masthead__sign-out {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.listing__footer {
+  display: flex;
+  justify-content: center;
+  margin-top: 3rem;
+}
