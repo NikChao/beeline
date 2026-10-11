@@ -1,8 +1,9 @@
 import HotwireNative
 import UIKit
 
-/// A web page. Adds a compose button on the shelf and desk, keeps a copy of
-/// each page it shows, and falls back to that copy when the server is away.
+/// A web page. Adds a compose button on the shelf and desk and a close button
+/// on modals, keeps a copy of each page it shows, and falls back to that copy
+/// when the server is away.
 final class PageViewController: HotwireWebViewController {
     private var offlineView: OfflinePageView?
     private var reconnect: (() -> Void)?
@@ -13,6 +14,22 @@ final class PageViewController: HotwireWebViewController {
         updateBarButtons()
 
         NotificationCenter.default.addObserver(self, selector: #selector(tryReconnecting), name: UIApplication.didBecomeActiveNotification, object: nil)
+    }
+
+    // Whether it's a modal is only known once it's on screen: visits load the
+    // view before the page is presented.
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        updateBarButtons()
+    }
+
+    // Escape closes a modal, as on the Mac it's the only way out.
+    override var keyCommands: [UIKeyCommand]? {
+        guard isModal else { return super.keyCommands }
+
+        let close = UIKeyCommand(title: "Close", action: #selector(close), input: UIKeyCommand.inputEscape)
+        close.wantsPriorityOverSystemBehavior = true
+        return (super.keyCommands ?? []) + [ close ]
     }
 
     override func visitableDidRender() {
@@ -83,6 +100,17 @@ final class PageViewController: HotwireWebViewController {
         }
 
         navigationItem.rightBarButtonItems = items
+        navigationItem.leftBarButtonItem = isModal ? UIBarButtonItem(title: "Close", image: UIImage(systemName: "xmark"), target: self, action: #selector(close)) : nil
+    }
+
+    /// Typing on the page is kept on the device as it's typed, so closing
+    /// loses nothing: the page picks up where it was the next time it opens.
+    @objc private func close() {
+        navigationController?.dismiss(animated: true)
+    }
+
+    private var isModal: Bool {
+        navigationController?.presentingViewController != nil
     }
 
     @objc private func startNewPage() {

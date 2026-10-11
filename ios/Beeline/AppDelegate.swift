@@ -21,7 +21,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         Hotwire.config.applicationUserAgentPrefix = "Beeline;"
         Hotwire.config.backButtonDisplayMode = .minimal
-        Hotwire.config.showDoneButtonOnModals = true
 
         // Paper-coloured web views, so pages never flash white while loading.
         Hotwire.config.makeCustomWebView = { configuration in

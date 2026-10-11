@@ -34,21 +34,57 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     /// After saving offline: close the page that was being typed and show
     /// where the save will end up, in its own tab when it has one.
     func show(_ url: URL) {
-        let navigator = tabBarController.activeNavigator
-        navigator.rootViewController.presentedViewController?.dismiss(animated: true)
-
-        if let index = tabs.firstIndex(where: { $0.url.path == url.path }),
-           let tabNavigator = tabBarController.navigator(for: tabs[index]) {
-            tabBarController.selectedIndex = index
-            tabNavigator.rootViewController.popToRootViewController(animated: false)
-            tabNavigator.reload()
+        if let index = tabIndex(for: url) {
+            openTab(index)
         } else {
+            let navigator = tabBarController.activeNavigator
+            navigator.rootViewController.presentedViewController?.dismiss(animated: true)
             navigator.route(url)
         }
+    }
+
+    /// The tab a page belongs at the top of. Home is the desk: signing out
+    /// lands there, and it asks to sign in again.
+    private func tabIndex(for url: URL) -> Int? {
+        let path = url.path.trimmingSuffix("/")
+        if path == Beeline.rootURL.path.trimmingSuffix("/") { return tabs.firstIndex { $0.url == Beeline.deskURL } }
+        return tabs.firstIndex { $0.url.path.trimmingSuffix("/") == path }
+    }
+
+    /// Back to the top of a tab, fresh, with any modal closed.
+    private func openTab(_ index: Int) {
+        tabBarController.activeNavigator.rootViewController.presentedViewController?.dismiss(animated: true)
+
+        guard let navigator = tabBarController.navigator(for: tabs[index]) else { return }
+        if #available(iOS 18.0, *) {
+            tabBarController.selectedTab = tabBarController.tabs[index]
+#if targetEnvironment(macCatalyst)
+            // The Mac's toolbar doesn't follow a tab chosen in code until the
+            // tab bar is laid out again.
+            tabBarController.setTabBarHidden(true, animated: false)
+            tabBarController.setTabBarHidden(false, animated: false)
+#endif
+        } else {
+            tabBarController.selectedIndex = index
+        }
+        navigator.rootViewController.popToRootViewController(animated: false)
+        navigator.reload()
     }
 }
 
 extension SceneDelegate: NavigatorDelegate {
+    // A link or redirect to the shelf or desk opens that tab rather than
+    // stacking a second copy of it inside whichever tab is showing, which
+    // left the tabs and the back button out of step.
+    func handle(proposal: VisitProposal, from navigator: Navigator) -> ProposalResult {
+        guard !navigator.rootViewController.viewControllers.isEmpty, // a tab's own first visit
+              let index = tabIndex(for: proposal.url)
+        else { return .accept }
+
+        DispatchQueue.main.async { self.openTab(index) }
+        return .reject
+    }
+
     func visitableDidFailRequest(_ visitable: any Visitable, error: HotwireNativeError, retryHandler: RetryBlock?) {
         // Out of reach: open the copy kept on this device, if there is one.
         // Signed out (on a server that wants sign-in): ask, then the page reloads.
@@ -63,5 +99,11 @@ extension SceneDelegate: NavigatorDelegate {
                 retryHandler?()
             }
         }
+    }
+}
+
+private extension String {
+    func trimmingSuffix(_ suffix: String) -> String {
+        hasSuffix(suffix) ? String(dropLast(suffix.count)) : self
     }
 }
