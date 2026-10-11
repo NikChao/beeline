@@ -79,6 +79,27 @@ xcodebuild test -project ios/Beeline.xcodeproj -scheme Beeline \
   -only-testing:BeelineUITests/OfflineUITests/test1_keepPagesWhileOnline
 ```
 
+## Run as native desktop app
+
+The iOS app also builds as a native Mac app, through Mac Catalyst. To build it
+and install it in `/Applications`, pointed at your server:
+
+```sh
+bin/install-desktop-app http://your-server.local/write
+```
+
+Run it again to update the app. Changes to the Rails app don't need a rebuild:
+the app shows whatever the server sends.
+
+- Leave off the URL to use `BEELINE_URL` from `ios/Config/Local.xcconfig`, or
+  `http://localhost:3000`.
+- It needs Xcode, but no Apple developer account: the app is signed ad hoc,
+  so it runs on the Mac that built it. To give it to other Macs, sign it with
+  a Developer ID and notarize it, or release it on the Mac App Store
+  ([docs/MOBILE_RELEASE.md](docs/MOBILE_RELEASE.md)).
+- To work on it, open `ios/Beeline.xcodeproj` and run the **My Mac (Mac
+  Catalyst)** destination instead.
+
 ## Serving from a sub-path
 
 To serve Beeline from a path like `example.com/write`, pass

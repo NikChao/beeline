@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+# Build the Mac app (Mac Catalyst) and install it in /Applications.
+#
+#   bin/install-desktop-app http://your-server.local/write
+#
+# Without a URL, the app uses BEELINE_URL from ios/Config/Local.xcconfig, or
+# http://localhost:3000. Signed ad hoc, so it runs on the Mac that built it.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+settings=(CODE_SIGN_IDENTITY=- CODE_SIGN_STYLE=Manual DEVELOPMENT_TEAM=)
+[[ $# -gt 0 ]] && settings+=("BEELINE_URL=$1")
+
+xcodebuild -project ios/Beeline.xcodeproj -scheme Beeline -configuration Release \
+  -destination 'generic/platform=macOS,variant=Mac Catalyst' \
+  -derivedDataPath build/DerivedData -quiet \
+  "${settings[@]}" build
+
+app=build/DerivedData/Build/Products/Release-maccatalyst/Beeline.app
+osascript -e 'quit app "Beeline"' 2>/dev/null || true
+rm -rf /Applications/Beeline.app
+ditto "$app" /Applications/Beeline.app
+open /Applications/Beeline.app
+
+echo "Installed /Applications/Beeline.app ($(/usr/libexec/PlistBuddy -c 'Print :BeelineURL' "$app/Contents/Info.plist"))"
