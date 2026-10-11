@@ -1,0 +1,10 @@
+<% content_for :title, "New page · Beeline" %>
+<% content_for :body_class, "writing" %>
+
+<div class="desk">
+  <div class="desk__pages">
+    <section class="desk__page desk__page--current">
+      <%= render "papers/drafts/form", draft: @draft, url: papers_path %>
+    </section>
+  </div>
+</div>

@@ -1,0 +1,25 @@
+<% content_for :title, "Desk · Beeline" %>
+<% keep_offline @papers.flat_map { |paper| [ paper_draft_path(paper, paper.latest_draft), new_paper_draft_path(paper) ] } %>
+
+<section class="listing">
+  <h1 class="listing__heading">On your desk</h1>
+
+  <% if @papers.any? %>
+    <ol class="listing__items">
+      <% @papers.each do |paper| %>
+        <li class="listing__item">
+          <%= link_to paper_draft_path(paper, paper.latest_draft), class: "listing__link" do %>
+            <span class="listing__title"><%= paper.title %></span>
+            <span class="listing__meta">
+              Draft <%= paper.latest_draft.number %>
+              <% if paper.published? %>· <span class="listing__published">Published</span><% end %>
+              · <%= time_ago_in_words paper.updated_at %> ago
+            </span>
+          <% end %>
+        </li>
+      <% end %>
+    </ol>
+  <% else %>
+    <p class="listing__empty">Your desk is clear. <%= link_to "Start a new page", new_paper_path %>.</p>
+  <% end %>
+</section>

@@ -1,0 +1,24 @@
+<% content_for :title, "Shelf · Beeline" %>
+<% keep_offline @papers.map { |paper| paper_path(paper) } %>
+
+<section class="listing">
+  <h1 class="listing__heading">On the shelf</h1>
+
+  <% if @papers.any? %>
+    <ol class="listing__items">
+      <% @papers.each do |paper| %>
+        <li class="listing__item">
+          <%= link_to paper, class: "listing__link" do %>
+            <span class="listing__title"><%= paper.published_draft.title %></span>
+            <span class="listing__meta">
+              <%= paper.published_draft.author.presence || "Anonymous" %> · <%= paper.publication.updated_at.to_date.to_fs(:long) %>
+            </span>
+            <span class="listing__excerpt"><%= paper.published_draft.excerpt %></span>
+          <% end %>
+        </li>
+      <% end %>
+    </ol>
+  <% else %>
+    <p class="listing__empty">Nothing on the shelf yet. <%= link_to "Put a page in the typewriter", new_paper_path %>.</p>
+  <% end %>
+</section>

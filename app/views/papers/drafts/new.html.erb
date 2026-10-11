@@ -1,0 +1,19 @@
+<% content_for :title, "Draft #{@previous.number + 1} of #{@previous.title} · Beeline" %>
+<% content_for :body_class, "writing" %>
+
+<div class="desk" data-controller="split" data-split-split-class="desk--split">
+  <div class="desk__toggle" role="group" aria-label="Layout">
+    <button type="button" class="desk__option" data-split-target="option" data-action="split#choose" data-split-split-param="false">This page</button>
+    <button type="button" class="desk__option" data-split-target="option" data-action="split#choose" data-split-split-param="true">Beside draft <%= @previous.number %></button>
+  </div>
+
+  <div class="desk__pages">
+    <section class="desk__page desk__page--previous" aria-label="Draft <%= @previous.number %>">
+      <%= render "papers/drafts/page", draft: @previous %>
+    </section>
+
+    <section class="desk__page desk__page--current" aria-label="Draft <%= @previous.number + 1 %>">
+      <%= render "papers/drafts/form", draft: @draft, url: paper_drafts_path(@paper) %>
+    </section>
+  </div>
+</div>

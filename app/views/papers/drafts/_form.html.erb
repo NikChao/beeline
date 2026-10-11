@@ -1,0 +1,35 @@
+<%= form_with model: draft, url: url, class: "typewriter", data: {
+      turbo: false,
+      controller: "typewriter",
+      action: "lexxy:change->typewriter#typed mousemove@window->typewriter#rest submit->typewriter#submit beforeunload@window->typewriter#confirmLeaving turbo:before-visit@document->typewriter#confirmLeaving"
+    } do |form| %>
+  <div class="page page--typescript">
+    <div class="page__content">
+      <% if draft.errors.any? %>
+        <p class="page__errors"><%= draft.errors.full_messages.to_sentence %>.</p>
+      <% end %>
+
+      <%= form.text_field :title, class: "page__title", placeholder: "Title", autocomplete: "off", required: true,
+            autofocus: draft.title.blank?, aria: { label: "Title" }, data: { action: "keydown.enter->typewriter#next" } %>
+      <%= form.text_field :author, class: "page__author", placeholder: "Author", autocomplete: "off",
+            aria: { label: "Author" }, data: { action: "keydown.enter->typewriter#next" } %>
+
+      <div class="page__body" data-action="keydown->typewriter#press:capture beforeinput->typewriter#input:capture cut->typewriter#refuse:capture dragstart->typewriter#refuse:capture drop->typewriter#refuse:capture">
+        <%= form.rich_text_area :body, class: "lexxy-content", toolbar: false, attachments: false,
+              autofocus: draft.title.present?, placeholder: "Start typing. There's no backspace.",
+              aria: { label: "Body" }, data: { typewriter_target: "editor" } %>
+      </div>
+    </div>
+  </div>
+
+  <footer class="typewriter__footer">
+    <p class="typewriter__keys">
+      <kbd>Ctrl B</kbd> bold <kbd>Ctrl I</kbd> italic <kbd>Ctrl U</kbd> underline <kbd>#</kbd> heading <kbd>-</kbd> list
+    </p>
+
+    <div class="typewriter__actions">
+      <%= form.button "Save as draft", class: "button" %>
+      <%= form.button "Publish", name: "publish", value: "1", class: "button button--primary" %>
+    </div>
+  </footer>
+<% end %>

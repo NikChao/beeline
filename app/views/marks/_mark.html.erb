@@ -1,0 +1,5 @@
+<% if mark.word? %>
+  <text class="mark mark--word mark--<%= mark.color %>" x="<%= mark.origin.first %>" y="<%= mark.origin.last %>" dominant-baseline="central"><%= mark.text %></text>
+<% else %>
+  <path class="mark mark--<%= mark.kind %> mark--<%= mark.color %>" d="<%= mark.path_data %>" />
+<% end %>

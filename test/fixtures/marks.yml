@@ -1,0 +1,5 @@
+strike:
+  draft: letter_first
+  kind: line
+  color: red
+  points: [[100, 200], [300, 200]]

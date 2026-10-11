@@ -1,0 +1,15 @@
+<%# locals: (draft:, markup: false) %>
+<article class="page page--typescript" <%= tag.attributes(data: markup ? {
+      markup_target: "page",
+      action: "pointerdown->markup#start pointermove->markup#move pointerup->markup#end pointercancel->markup#end"
+    } : {}) %>>
+  <div class="page__content">
+    <h1 class="page__title"><%= draft.title %></h1>
+    <p class="page__author"><%= draft.author %></p>
+    <div class="page__body"><%= draft.body %></div>
+  </div>
+
+  <svg class="marks" viewBox="0 0 1000 1000" aria-hidden="true" <%= tag.attributes(data: { markup_target: ("canvas" if markup) }) %>>
+    <%= render partial: "marks/mark", collection: draft.marks %>
+  </svg>
+</article>

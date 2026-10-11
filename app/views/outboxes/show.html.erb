@@ -1,0 +1,26 @@
+<% content_for :title, "Outbox · Beeline" %>
+
+<section class="listing" data-controller="outbox" data-action="outbox:changed@window->outbox#render">
+  <h1 class="listing__heading">Outbox</h1>
+
+  <p class="outbox__notice" data-outbox-target="queued" hidden>
+    Saved on this device. It goes to your desk as soon as Beeline's host can be reached.
+  </p>
+  <p class="outbox__notice" data-outbox-target="unavailable" hidden>
+    Beeline's host is out of reach and that page isn't kept on this device. You can still <%= link_to "start a new page", new_paper_path %>.
+  </p>
+
+  <ol class="listing__items" data-outbox-target="list"></ol>
+  <p class="listing__empty" data-outbox-target="empty">Nothing waiting. Everything you've typed is on your desk.</p>
+
+  <template data-outbox-target="template">
+    <li class="listing__item">
+      <div class="listing__link">
+        <span class="listing__title" data-field="title"></span>
+        <span class="listing__meta" data-field="meta"></span>
+        <p class="outbox__text" data-field="text" hidden></p>
+        <button type="button" class="button button--quiet outbox__discard" data-field="discard" data-action="outbox#discard" hidden>Discard</button>
+      </div>
+    </li>
+  </template>
+</section>

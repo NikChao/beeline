@@ -1,0 +1,32 @@
+<% content_for :title, "#{@draft.title}, draft #{@draft.number} · Beeline" %>
+<% content_for :body_class, "marking" %>
+
+<div class="draft" data-controller="markup" data-markup-url-value="<%= paper_draft_marks_path(@paper, @draft) %>" data-action="keydown@window->markup#hotkey">
+  <header class="draft__header">
+    <nav class="draft__versions" aria-label="Drafts">
+      <% @paper.drafts.each do |draft| %>
+        <%= link_to "Draft #{draft.number}", paper_draft_path(@paper, draft), class: "draft__version", aria: { current: draft == @draft ? "page" : nil } %>
+      <% end %>
+    </nav>
+
+    <div class="draft__actions">
+      <% if @draft.published? %>
+        <%= link_to "Published", paper_path(@paper), class: "draft__status" %>
+        <%= button_to "Unpublish", paper_publication_path(@paper), method: :delete, class: "button button--quiet" %>
+      <% else %>
+        <%= button_to "Publish this draft", paper_publication_path(@paper, draft_id: @draft), class: "button" %>
+      <% end %>
+      <% if @draft.latest? %>
+        <%= link_to "Write draft #{@draft.number + 1}", new_paper_draft_path(@paper), class: "button button--primary" %>
+      <% end %>
+    </div>
+  </header>
+
+  <%= render "papers/drafts/tray" %>
+  <%= render "papers/drafts/page", draft: @draft, markup: true %>
+
+  <footer class="draft__footer">
+    <%= button_to "Throw this paper away", paper_path(@paper), method: :delete, class: "button button--quiet",
+          form: { data: { turbo_confirm: "Throw away every draft of “#{@draft.title}”?" } } %>
+  </footer>
+</div>

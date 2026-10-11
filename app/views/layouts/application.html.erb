@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Beeline" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Beeline">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#ebe5d8">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <%= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+
+    <%= stylesheet_link_tag "lexxy", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="<%= content_for(:body_class) %>" data-controller="offline" data-action="online@window->offline#online offline@window->offline#offline">
+    <header class="masthead">
+      <%= link_to "Beeline", root_path, class: "masthead__name" %>
+
+      <%= link_to outbox_path, class: "masthead__status", hidden: true, data: { offline_target: "status" } do %>
+        <span class="masthead__offline">Offline</span>
+        <span data-offline-target="count"></span>
+      <% end %>
+
+      <nav class="masthead__nav">
+        <%= link_to "Shelf", root_path, class: "masthead__link", aria: { current: current_page?(root_path) || current_page?(shelf_path) ? "page" : nil } %>
+        <%= link_to "Desk", papers_path, class: "masthead__link", aria: { current: current_page?(papers_path) ? "page" : nil } %>
+        <%= link_to "New page", new_paper_path, class: "masthead__link masthead__link--new" %>
+      </nav>
+    </header>
+
+    <main class="main">
+      <%= yield %>
+    </main>
+  </body>
+</html>

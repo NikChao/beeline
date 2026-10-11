@@ -1,0 +1,17 @@
+letter_first:
+  paper: letter
+  number: 1
+  title: A letter
+  author: Ada
+
+letter_second:
+  paper: letter
+  number: 2
+  title: A letter, again
+  author: Ada
+
+essay_first:
+  paper: essay
+  number: 1
+  title: On paper
+  author: Grace

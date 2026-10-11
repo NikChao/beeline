@@ -1,0 +1,17 @@
+<div class="tray" role="toolbar" aria-label="Pens">
+  <div class="tray__group">
+    <button type="button" class="tray__tool" data-markup-target="tool" data-action="markup#pick" data-markup-tool-param="line" title="Marker — strike or highlight a word (M)">Marker</button>
+    <button type="button" class="tray__tool" data-markup-target="tool" data-action="markup#pick" data-markup-tool-param="stroke" title="Pen — draw freely (P)">Pen</button>
+    <button type="button" class="tray__tool" data-markup-target="tool" data-action="markup#pick" data-markup-tool-param="word" title="Word — click to place a word (W)">Word</button>
+  </div>
+
+  <div class="tray__group">
+    <% Mark::COLORS.each.with_index(1) do |color, index| %>
+      <button type="button" class="tray__color tray__color--<%= color %>" data-markup-target="color" data-action="markup#pick" data-markup-color-param="<%= color %>" title="<%= color.capitalize %> (<%= index %>)">
+        <span class="visually-hidden"><%= color.capitalize %></span>
+      </button>
+    <% end %>
+  </div>
+
+  <button type="button" class="tray__tool tray__tool--undo" data-action="markup#undo" title="Take back your last mark (Ctrl Z). Marks dry when you leave the page.">Undo</button>
+</div>

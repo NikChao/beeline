@@ -1,0 +1,5 @@
+letter:
+  updated_at: <%= 1.hour.ago.to_fs(:db) %>
+
+essay:
+  updated_at: <%= 2.hours.ago.to_fs(:db) %>

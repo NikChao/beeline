@@ -1,0 +1,14 @@
+letter_first:
+  record: letter_first (Draft)
+  name: body
+  body: <p>Dear reader, the first try.</p>
+
+letter_second:
+  record: letter_second (Draft)
+  name: body
+  body: <p>Dear reader, the second try.</p>
+
+essay_first:
+  record: essay_first (Draft)
+  name: body
+  body: <p>Paper is <u>patient</u>.</p>

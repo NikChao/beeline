@@ -1,0 +1,20 @@
+<% content_for :title, "#{@draft.title} · Beeline" %>
+<% content_for :body_class, "reading" %>
+
+<article class="reading-page">
+  <header class="reading-page__header">
+    <h1 class="reading-page__title"><%= @draft.title %></h1>
+    <p class="reading-page__byline">
+      <% if @draft.author.present? %><%= @draft.author %> · <% end %><%= @paper.publication.updated_at.to_date.to_fs(:long) %>
+    </p>
+  </header>
+
+  <div class="reading-page__body">
+    <%= @draft.body %>
+  </div>
+
+  <footer class="reading-page__footer">
+    <%= link_to "Back to the shelf", root_path %>
+    <%= link_to "See the drafts", paper_draft_path(@paper, @draft) %>
+  </footer>
+</article>
