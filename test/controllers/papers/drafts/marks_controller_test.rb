@@ -11,6 +11,15 @@ class Papers::Drafts::MarksControllerTest < ActionDispatch::IntegrationTest
     assert_equal Mark.last.id, response.parsed_body["id"]
   end
 
+  test "a replayed mark is made once" do
+    path = paper_draft_marks_path(papers(:letter), drafts(:letter_first))
+    mark = { kind: "line", color: "red", points: [ 1, 1, 9, 1 ] }
+
+    assert_difference -> { Mark.count }, 1 do
+      2.times { post path, params: { mark: mark }, headers: { "Idempotency-Key" => "outbox-3" }, as: :json }
+    end
+  end
+
   test "a bad mark is refused" do
     post paper_draft_marks_path(papers(:letter), drafts(:letter_first)),
       params: { mark: { kind: "line", color: "purple", points: [ 1, 1, 2, 2 ] } }, as: :json

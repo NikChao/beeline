@@ -1,0 +1,19 @@
+{
+  "settings": {},
+  "rules": [
+    {
+      "patterns": [".*"],
+      "properties": { "context": "default", "pull_to_refresh_enabled": true }
+    },
+    {
+      "patterns": ["/new$"],
+      "properties": { "context": "modal", "modal_style": "full", "pull_to_refresh_enabled": false },
+      "comment": "Type a new page or draft full screen."
+    },
+    {
+      "patterns": ["/drafts/\\d+$"],
+      "properties": { "pull_to_refresh_enabled": false },
+      "comment": "Pulling down would fight the pen."
+    }
+  ]
+}

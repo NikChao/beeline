@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_10_11_005047) do
+ActiveRecord::Schema[8.1].define(version: 2026_10_11_051453) do
   create_table "action_text_rich_texts", force: :cascade do |t|
     t.string "name", null: false
     t.text "body"
@@ -56,6 +56,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_11_005047) do
     t.string "author"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "client_key"
+    t.index ["client_key"], name: "index_drafts_on_client_key", unique: true
     t.index ["paper_id", "number"], name: "index_drafts_on_paper_id_and_number", unique: true
     t.index ["paper_id"], name: "index_drafts_on_paper_id"
   end
@@ -68,6 +70,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_10_11_005047) do
     t.string "text"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "client_key"
+    t.index ["client_key"], name: "index_marks_on_client_key", unique: true
     t.index ["draft_id"], name: "index_marks_on_draft_id"
   end
 

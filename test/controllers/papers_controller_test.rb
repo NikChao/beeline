@@ -12,7 +12,7 @@ class PapersControllerTest < ActionDispatch::IntegrationTest
   test "desk lists every paper" do
     get papers_path
 
-    assert_select ".listing__title", count: 2
+    assert_select ".listing > .listing__items .listing__title", count: 2
   end
 
   test "saving a draft keeps it on the desk" do
@@ -24,6 +24,15 @@ class PapersControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to paper_draft_path(paper, paper.latest_draft)
     assert_not paper.published?
     assert_equal "Ada", cookies[:author]
+  end
+
+  test "a replayed save finds the page it already made" do
+    headers = { "Idempotency-Key" => "outbox-1" }
+
+    assert_difference -> { Paper.count }, 1 do
+      2.times { post papers_path, params: { draft: { title: "Once", body: "<p>Only once.</p>" } }, headers: headers }
+    end
+    assert_redirected_to paper_draft_path(Paper.last, Paper.last.latest_draft)
   end
 
   test "publishing puts it on the shelf" do

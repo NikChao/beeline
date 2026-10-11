@@ -8,8 +8,10 @@ first word to the last, mark the page up with a pen, and type it again.
 - **Write**: title, author and body. Ctrl+B/I/U, `#` for headings, `-` for bullets.
 - **Mark up** a draft with a marker, a pen, or words placed on the page.
 - **Redraft** beside the previous draft, then **publish** to the shelf.
-- **Offline**: pages are kept on the device and saves wait in an outbox until
-  the host is back.
+- **Offline first**: every save goes to an outbox on your device, then syncs
+  when the server answers. Queued pages show up on your desk and shelf straight
+  away, marked as waiting.
+- **Apps** for iPhone, iPad and Mac, built with Hotwire Native.
 
 ## A tour
 
@@ -38,6 +40,45 @@ bin/rails db:seed   # an example paper (development only)
 bin/dev
 ```
 
+## Offline first
+
+Saving never waits for the server. Every new page, draft, publish and mark is
+written to an outbox in the page's IndexedDB (`app/javascript/lib/outbox.js`)
+and sent from there, in order, whenever the server answers: on each page load,
+when the device comes back online, when the app returns to the foreground, and
+every 30 seconds while anything is waiting. Each save carries a key, so one
+that's replayed after a lost response isn't made twice. Whatever you're typing
+is also kept on the device as you type.
+
+Opening pages without the server:
+
+- **Browsers** use a service worker, which needs HTTPS (or `localhost`).
+- **The iOS app** keeps copies of the pages it shows and opens them when the
+  server is out of reach. It needs to reach the server once, to download them.
+
+## The iOS app
+
+`ios/` is a Hotwire Native app for iPhone, iPad and Mac (Catalyst).
+
+```sh
+cp ios/Config/Local.xcconfig.example ios/Config/Local.xcconfig  # set BEELINE_URL
+open ios/Beeline.xcodeproj
+```
+
+`BEELINE_URL` defaults to `http://localhost:3000`, which the simulator reaches
+on your Mac. Plain http works on a local network (`.local` names and IPs). To
+run on a device or a Mac, set your `DEVELOPMENT_TEAM` in `Local.xcconfig`.
+
+Releasing to the App Store: see [docs/MOBILE_RELEASE.md](docs/MOBILE_RELEASE.md).
+
+The offline UI test runs in three steps, with the server up, down, then up:
+
+```sh
+xcodebuild test -project ios/Beeline.xcodeproj -scheme Beeline \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+  -only-testing:BeelineUITests/OfflineUITests/test1_keepPagesWhileOnline
+```
+
 ## Serving from a sub-path
 
 To serve Beeline from a path like `example.com/write`, pass
@@ -52,8 +93,7 @@ Then proxy `/write/` to the container without stripping the prefix.
 
 ## Notes
 
-- The service worker only runs in a secure context: `localhost` or HTTPS.
-  Serving over plain http on a local network needs a certificate (Caddy's
-  internal CA, mkcert, or Tailscale) for offline mode to work.
+- In browsers, opening pages offline needs a secure context (`localhost` or
+  HTTPS). Saving offline works everywhere, plain http included.
 - There's no sign-in. Anyone who can reach the host can write and publish.
 - Typeset in [Courier Prime](https://github.com/quoteunquoteapps/CourierPrime) (SIL OFL, see `app/assets/fonts/OFL.txt`).

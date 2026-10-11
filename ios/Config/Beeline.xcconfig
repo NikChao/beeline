@@ -1,0 +1,10 @@
+// Settings for the Beeline app.
+//
+// Point the app at your own server by copying Local.xcconfig.example to
+// Local.xcconfig (it's gitignored) and setting BEELINE_URL there.
+// The `$()` stops xcconfig reading the `//` in a URL as a comment.
+
+BEELINE_URL = http:/$()/localhost:3000
+BEELINE_BUNDLE_ID = com.example.beeline
+
+#include? "Local.xcconfig"

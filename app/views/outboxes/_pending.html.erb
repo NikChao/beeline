@@ -1,0 +1,16 @@
+<%# locals: (shelf: false) %>
+<%# Filled in on this device from the outbox: saves that haven't reached the server yet. %>
+<section class="pending" data-controller="pending" data-pending-shelf-value="<%= shelf %>" data-pending-outbox-value="<%= outbox_path %>"
+    data-action="outbox:changed@window->pending#render outbox:synced@window->pending#refresh" hidden>
+  <ol class="listing__items" data-pending-target="list"></ol>
+
+  <template data-pending-target="template">
+    <li class="listing__item listing__item--pending">
+      <a class="listing__link" data-field="link">
+        <span class="listing__title" data-field="title"></span>
+        <span class="listing__meta" data-field="meta"></span>
+        <span class="listing__excerpt" data-field="excerpt"></span>
+      </a>
+    </li>
+  </template>
+</section>

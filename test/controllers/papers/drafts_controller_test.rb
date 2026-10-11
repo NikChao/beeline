@@ -23,6 +23,14 @@ class Papers::DraftsControllerTest < ActionDispatch::IntegrationTest
     assert_redirected_to paper_draft_path(papers(:letter), draft)
   end
 
+  test "a replayed draft isn't written twice" do
+    headers = { "Idempotency-Key" => "outbox-2" }
+
+    assert_difference -> { papers(:letter).drafts.count }, 1 do
+      2.times { post paper_drafts_path(papers(:letter)), params: { draft: { title: "Again", body: "<p>Third.</p>" } }, headers: headers }
+    end
+  end
+
   test "write and publish the next draft" do
     post paper_drafts_path(papers(:essay)), params: { publish: "1", draft: { title: "On paper", body: "<p>Still patient.</p>" } }
 

@@ -11,7 +11,7 @@ class Papers::DraftsController < ApplicationController
   end
 
   def create
-    @draft = @paper.draft(draft_params)
+    @draft = @paper.drafts.saved_with(client_key) || @paper.draft(draft_params.merge(client_key: client_key))
     @paper.publish(@draft) if params[:publish]
 
     redirect_to params[:publish] ? paper_path(@paper) : paper_draft_path(@paper, @draft)

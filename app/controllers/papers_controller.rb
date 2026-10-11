@@ -18,14 +18,15 @@ class PapersController < ApplicationController
   end
 
   def create
-    @paper = Paper.write(draft_params)
+    @draft = Draft.saved_with(client_key) || Paper.write(draft_params.merge(client_key: client_key)).latest_draft
+    @paper = @draft.paper
     remember_author
 
     if params[:publish]
-      @paper.publish
+      @paper.publish(@draft)
       redirect_to @paper
     else
-      redirect_to paper_draft_path(@paper, @paper.latest_draft)
+      redirect_to paper_draft_path(@paper, @draft)
     end
   rescue ActiveRecord::RecordInvalid => invalid
     @draft = invalid.record

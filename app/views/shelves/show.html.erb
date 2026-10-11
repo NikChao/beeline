@@ -1,8 +1,10 @@
-<% content_for :title, "Shelf · Beeline" %>
+<% content_for :title, "Shelf" %>
 <% keep_offline @papers.map { |paper| paper_path(paper) } %>
 
 <section class="listing">
   <h1 class="listing__heading">On the shelf</h1>
+
+  <%= render "outboxes/pending", shelf: true %>
 
   <% if @papers.any? %>
     <ol class="listing__items">

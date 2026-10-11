@@ -134,33 +134,6 @@ kbd {
   color: var(--ink);
 }
 
-.masthead__status {
-  margin-left: auto;
-  font-size: 0.85rem;
-  color: var(--ink-faint);
-  text-decoration: none;
-
-  &[hidden] {
-    display: none;
-  }
-}
-
-.masthead__offline {
-  display: none;
-  margin-right: 0.4em;
-  padding: 0.1em 0.6em;
-  border: 1px solid var(--rule);
-  border-radius: 999px;
-}
-
-.offline .masthead__offline {
-  display: inline;
-}
-
-.masthead__status--trouble {
-  color: var(--red);
-}
-
 .masthead__nav {
   display: flex;
   gap: 1.25rem;
@@ -178,6 +151,17 @@ kbd {
 
 .main {
   padding: 0 1.5rem 6rem;
+}
+
+@media (max-width: 600px) {
+  .main {
+    padding-inline: 0.75rem;
+  }
+}
+
+/* In the app, native tabs and the navigation bar replace the masthead. */
+.native .main {
+  padding-top: 1.25rem;
 }
 
 /* Buttons */
@@ -350,6 +334,16 @@ input.page__author::placeholder {
   }
 }
 
+/* On a phone, the page you type on reflows to a readable size. It carries no
+ * marks, so nothing needs to stay aligned; marked-up drafts keep their
+ * proportions and can be pinched to zoom. */
+@container (max-width: 560px) {
+  .typewriter .page__content {
+    padding: 2rem 1.25rem 3rem;
+    font-size: 16px;
+  }
+}
+
 /* Lexxy, without the chrome */
 
 .page lexxy-editor {
@@ -411,12 +405,16 @@ input.page__author::placeholder {
   padding-bottom: 40vh;
 }
 
-/* While the keys are moving, everything else steps back. */
-body:has(.typewriter--typing) {
-  .masthead,
-  .desk__toggle,
-  .typewriter__footer {
-    opacity: 0;
+/* While the keys are moving, everything else steps back, until the mouse
+ * moves. Only with a mouse: on touch screens there's nothing to bring it back
+ * but a tap, and iOS swallows a tap that makes something appear. */
+@media (hover: hover) {
+  body:has(.typewriter--typing) {
+    .masthead,
+    .desk__toggle,
+    .typewriter__footer {
+      opacity: 0;
+    }
   }
 }
 
@@ -744,6 +742,24 @@ body:has(.typewriter--typing) {
   list-style: none;
 }
 
+/* Waiting to sync: a little paler, until the server has it. */
+.pending + .listing__items .listing__item:first-child,
+.pending:not([hidden]) ~ .listing__empty {
+  border-top: 1px solid var(--rule);
+}
+
+.pending:not([hidden]) ~ .listing__empty {
+  display: none;
+}
+
+.listing__item--pending .listing__title {
+  color: var(--ink-soft);
+}
+
+.listing__item--trouble .listing__meta {
+  color: var(--red);
+}
+
 .listing__item + .listing__item {
   border-top: 1px solid var(--rule);
 }
@@ -789,6 +805,38 @@ body:has(.typewriter--typing) {
   color: var(--ink-soft);
   font-family: var(--book);
   font-size: 1.1rem;
+}
+
+/* Waiting to sync */
+
+.sync-status {
+  position: fixed;
+  left: 1rem;
+  bottom: 1rem;
+  z-index: 2;
+  padding: 0.35em 0.9em;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--paper) 85%, transparent);
+  box-shadow: 0 2px 10px -4px rgb(60 50 30 / 0.3);
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  text-decoration: none;
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.sync-status--trouble {
+  color: var(--red);
+}
+
+/* The app's tab bar floats over the bottom of the page, so it sits up top there. */
+.native .sync-status:not([hidden]) {
+  position: static;
+  display: block;
+  width: fit-content;
+  margin: 0 auto 1rem;
 }
 
 /* Outbox */

@@ -1,4 +1,5 @@
 import { Controller } from "@hotwired/stimulus"
+import { enqueue, flush } from "lib/outbox"
 
 const SVG = "http://www.w3.org/2000/svg"
 const TOOL_KEYS = { m: "line", p: "stroke", w: "word" }
@@ -11,12 +12,15 @@ export default class extends Controller {
 
   connect() {
     this.made = []
+
+    // On touch screens, start with the pen down so a finger scrolls the page.
+    if (matchMedia("(pointer: coarse)").matches) this.toolValue = ""
   }
 
   // Tray
 
   pick({ params: { tool, color } }) {
-    if (tool) this.toolValue = tool
+    if (tool) this.toolValue = this.toolValue === tool ? "" : tool
     if (color) this.colorValue = color
   }
 
@@ -165,22 +169,24 @@ export default class extends Controller {
     return element
   }
 
+  // Marks go to the outbox like everything else. One that went straight
+  // through can be taken back; one waiting to sync stays on the page.
   async #save(mark, element) {
-    const response = await fetch(this.urlValue, {
-      method: "POST",
-      headers: { ...this.#headers, "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify({ mark: { ...mark, points: mark.points.flat() } })
+    const entry = await enqueue({
+      url: this.urlValue,
+      contentType: "application/json",
+      accept: "application/json",
+      body: JSON.stringify({ mark: { ...mark, points: mark.points.flat() } }),
+      kind: "mark"
     })
 
-    if (response.ok) {
-      // Marks made offline are queued (no id yet): they'll sync, but can't be taken back.
-      const { id } = await response.json()
-      if (id) {
-        element.dataset.markId = id
-        this.made.push(element)
-      }
-    } else {
-      element.remove()
+    let sent = await flush()
+    if (!sent.has(entry.id)) sent = await flush()
+
+    const response = sent.get(entry.id)
+    if (response) {
+      element.dataset.markId = (await response.json()).id
+      this.made.push(element)
     }
   }
 

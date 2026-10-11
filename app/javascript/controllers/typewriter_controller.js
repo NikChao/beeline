@@ -25,7 +25,7 @@ const HOTKEY_FORMATS = { b: "bold", i: "italic", u: "underline" }
 const UNSUPPORTED_FORMATS = [ "code", "strikethrough", "highlight", "subscript", "superscript" ]
 
 export default class extends Controller {
-  static targets = [ "editor" ]
+  static targets = [ "editor", "title", "author", "notice" ]
 
   connect() {
     if (this.editorTarget.editor) {
@@ -69,6 +69,7 @@ export default class extends Controller {
   }
 
   typed() {
+    this.remember()
     this.dirty = true
     this.element.classList.add("typewriter--typing")
     this.#keepCaretLevel()
@@ -88,8 +89,29 @@ export default class extends Controller {
     following ? following.focus() : this.editorTarget.focus()
   }
 
-  submit() {
+  submit(event) {
+    if (!this.#bodyText) {
+      event.preventDefault()
+      event.stopPropagation()
+      this.noticeTarget.textContent = "Type something on the page first."
+      this.noticeTarget.hidden = false
+    }
+  }
+
+  // Saved to the outbox: the page is safe, nothing to warn about or restore.
+  queued() {
     this.dirty = false
+    localStorage.removeItem(this.#storageKey)
+  }
+
+  // Everything typed is kept on this device as it's typed, so a crash, a
+  // closed app or a dead battery loses nothing.
+  remember() {
+    localStorage.setItem(this.#storageKey, JSON.stringify({
+      title: this.titleTarget.value,
+      author: this.authorTarget.value,
+      body: this.editorTarget.value
+    }))
   }
 
   confirmLeaving(event) {
@@ -124,6 +146,26 @@ export default class extends Controller {
 
       ...this.#keepToSimpleMarkdown(editor)
     ]
+
+    this.#restore()
+  }
+
+  #restore() {
+    const kept = JSON.parse(localStorage.getItem(this.#storageKey) || "null")
+    if (!kept?.body) return
+
+    this.titleTarget.value = kept.title
+    this.authorTarget.value = kept.author
+    this.editorTarget.value = kept.body
+    this.dirty = true
+  }
+
+  get #storageKey() {
+    return `beeline:typing:${this.element.action}`
+  }
+
+  get #bodyText() {
+    return new DOMParser().parseFromString(this.editorTarget.value || "", "text/html").body.textContent.trim()
   }
 
   // Lexxy's markdown shortcuts cover everything; on a typewriter we only want

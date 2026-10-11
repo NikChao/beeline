@@ -1,6 +1,8 @@
 # A mark made with a pen over a draft. Coordinates are in page units: the page
 # is 1000 units wide, so marks scale with the page instead of the viewport.
 class Mark < ApplicationRecord
+  include ClientKeyed
+
   KINDS = %w[ line stroke word ]
   COLORS = %w[ red green yellow ]
   MAX_POINTS = 2_000

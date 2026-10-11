@@ -1,0 +1,8 @@
+// Copy to Local.xcconfig (gitignored) to point the app at your server.
+
+// Where Beeline is served from, including any sub-path.
+BEELINE_URL = http:/$()/your-server.local/write
+
+// Your own bundle identifier, and your team for running on a device or Mac.
+BEELINE_BUNDLE_ID = com.yourname.beeline
+DEVELOPMENT_TEAM = ABCDE12345

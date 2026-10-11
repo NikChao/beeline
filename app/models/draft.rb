@@ -1,4 +1,6 @@
 class Draft < ApplicationRecord
+  include ClientKeyed
+
   belongs_to :paper, touch: true
   has_many :marks, -> { order(:id) }, dependent: :destroy
   has_rich_text :body

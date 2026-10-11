@@ -71,7 +71,7 @@ class TypewriterTest < ApplicationSystemTestCase
     visit paper_draft_path(papers(:letter), drafts(:letter_second))
 
     page_box = find(".page")
-    click_on "Marker"
+    assert_selector ".tray__tool[aria-pressed=true]", text: "Marker"
     tap page_box, at: [ 200, 300 ] # just a click: no mark
     draw page_box, from: [ 120, 300 ], to: [ 400, 300 ]
     assert_selector "svg.marks path.mark--line.mark--red"
@@ -86,7 +86,9 @@ class TypewriterTest < ApplicationSystemTestCase
     find(".marks__word-input").send_keys "tighter", :enter
     assert_selector "svg.marks text.mark--word", text: "tighter"
 
-    assert_equal 3, drafts(:letter_second).marks.reload.count
+    # Marks are drawn at once, and reach the server through the outbox.
+    assert_no_selector ".sync-status", visible: true
+    Timeout.timeout(Capybara.default_max_wait_time) { sleep 0.05 until drafts(:letter_second).marks.count == 3 }
     refresh
     assert_selector "svg.marks .mark", count: 3
 

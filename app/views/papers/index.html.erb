@@ -1,8 +1,10 @@
-<% content_for :title, "Desk · Beeline" %>
+<% content_for :title, "Desk" %>
 <% keep_offline @papers.flat_map { |paper| [ paper_draft_path(paper, paper.latest_draft), new_paper_draft_path(paper) ] } %>
 
 <section class="listing">
   <h1 class="listing__heading">On your desk</h1>
+
+  <%= render "outboxes/pending" %>
 
   <% if @papers.any? %>
     <ol class="listing__items">

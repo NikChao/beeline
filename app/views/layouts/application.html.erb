@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for(:title) || "Beeline" %></title>
+    <title><%= page_title %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="application-name" content="Beeline">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#ebe5d8">
     <%= csrf_meta_tags %>
+    <meta name="beeline-root" content="<%= root_path %>">
     <%= csp_meta_tag %>
 
     <%= yield :head %>
@@ -22,24 +23,31 @@
     <%= javascript_importmap_tags %>
   </head>
 
-  <body class="<%= content_for(:body_class) %>" data-controller="offline" data-offline-worker-value="<%= pwa_service_worker_path(format: :js) %>" data-offline-scope-value="<%= root_path %>" data-action="online@window->offline#online offline@window->offline#offline">
-    <header class="masthead">
-      <%= link_to "Beeline", root_path, class: "masthead__name" %>
+  <%= tag.body class: [ ("native" if hotwire_native_app?), content_for(:body_class) ], data: {
+        controller: "sync",
+        sync_outbox_value: outbox_path,
+        sync_shelf_value: root_path,
+        sync_desk_value: papers_path,
+        sync_worker_value: (pwa_service_worker_path(format: :js) unless hotwire_native_app?),
+        sync_scope_value: root_path,
+        action: "submit->sync#submit outbox:changed@window->sync#refresh online@window->sync#sync visibilitychange@document->sync#resume"
+      } do %>
+    <% unless hotwire_native_app? %>
+      <header class="masthead">
+        <%= link_to "Beeline", root_path, class: "masthead__name" %>
 
-      <%= link_to outbox_path, class: "masthead__status", hidden: true, data: { offline_target: "status" } do %>
-        <span class="masthead__offline">Offline</span>
-        <span data-offline-target="count"></span>
-      <% end %>
+        <nav class="masthead__nav">
+          <%= link_to "Shelf", root_path, class: "masthead__link", aria: { current: current_page?(root_path) || current_page?(shelf_path) ? "page" : nil } %>
+          <%= link_to "Desk", papers_path, class: "masthead__link", aria: { current: current_page?(papers_path) ? "page" : nil } %>
+          <%= link_to "New page", new_paper_path, class: "masthead__link masthead__link--new" %>
+        </nav>
+      </header>
+    <% end %>
 
-      <nav class="masthead__nav">
-        <%= link_to "Shelf", root_path, class: "masthead__link", aria: { current: current_page?(root_path) || current_page?(shelf_path) ? "page" : nil } %>
-        <%= link_to "Desk", papers_path, class: "masthead__link", aria: { current: current_page?(papers_path) ? "page" : nil } %>
-        <%= link_to "New page", new_paper_path, class: "masthead__link masthead__link--new" %>
-      </nav>
-    </header>
+    <%= link_to "", outbox_path, class: "sync-status", hidden: true, data: { sync_target: "status" } %>
 
     <main class="main">
       <%= yield %>
     </main>
-  </body>
+  <% end %>
 </html>

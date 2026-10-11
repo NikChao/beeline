@@ -33,3 +33,11 @@
 # Ignore key files for decrypting credentials and more.
 /config/*.key
 
+
+# iOS app
+/ios/Config/Local.xcconfig
+/ios/build/
+/build/
+xcuserdata/
+*.xcuserstate
+DerivedData/
