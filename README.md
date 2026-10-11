@@ -167,3 +167,8 @@ Then proxy `/write/` to the container without stripping the prefix.
 - In local mode there's no sign-in: anyone who can reach the host can write
   and publish. Use prod mode anywhere public.
 - Typeset in [Courier Prime](https://github.com/quoteunquoteapps/CourierPrime) (SIL OFL, see `app/assets/fonts/OFL.txt`).
+
+## License
+
+Beeline is released under the [MIT License](LICENSE). Courier Prime keeps its
+own license, the SIL Open Font License.

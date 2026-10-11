@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# A Rails console in the production container, through Kamal (config/deploy.yml).
+#
+#   bin/remote-session                                   # rails console
+#   bin/remote-session 'bin/rails runner "p User.count"'  # or any command
+#
+# Careful: this is production data.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+command=${1:-bin/rails console}
+
+# Interactive when there's a terminal to be interactive in.
+interactive=()
+[[ -t 0 && -t 1 ]] && interactive=(--interactive)
+
+exec bin/kamal app exec ${interactive[@]+"${interactive[@]}"} --reuse "$command"
