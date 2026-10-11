@@ -332,6 +332,66 @@ input.page__author::placeholder {
     text-decoration: underline;
     text-underline-offset: 0.18em;
   }
+
+  /* Struck through, like x-ing out on a typewriter. */
+  :where(s, del, .lexxy-content__strikethrough) {
+    text-decoration: line-through;
+    text-decoration-thickness: 0.08em;
+  }
+
+  /* In the editor both formats can sit on one span. */
+  .lexxy-content__underline.lexxy-content__strikethrough {
+    text-decoration-line: underline line-through;
+  }
+}
+
+/* Keyboard shortcuts for keyboards; on touch screens, the format bar. */
+.typewriter__keys--touch {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .typewriter__keys--keyboard {
+    display: none;
+  }
+
+  .typewriter__keys--touch {
+    display: block;
+  }
+}
+
+/* The format bar, under a selection on touch screens. */
+.format-bar {
+  position: absolute;
+  z-index: 3;
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--paper);
+  box-shadow: 0 1px 2px rgb(60 50 30 / 0.12), 0 8px 24px -8px rgb(60 50 30 / 0.35);
+
+  &[hidden] {
+    display: none;
+  }
+}
+
+.format-bar__button {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--ink);
+  font-family: var(--typescript);
+  font-size: 1.1rem;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+
+  &[aria-pressed="true"] {
+    background: color-mix(in srgb, var(--ink) 9%, transparent);
+  }
 }
 
 /* On a phone, the page you type on reflows to a readable size. It carries no
@@ -929,6 +989,10 @@ input.page__author::placeholder {
 
   u {
     text-underline-offset: 0.18em;
+  }
+
+  :where(s, del) {
+    text-decoration-thickness: 0.07em;
   }
 }
 

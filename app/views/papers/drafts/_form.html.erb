@@ -1,7 +1,7 @@
 <%= form_with model: draft, url: url, class: "typewriter", data: {
       offline: draft.paper&.persisted? ? "draft" : "page",
       controller: "typewriter",
-      action: "lexxy:change->typewriter#typed mousemove@window->typewriter#rest submit->typewriter#submit outbox:queued->typewriter#queued beforeunload@window->typewriter#confirmLeaving turbo:before-visit@document->typewriter#confirmLeaving"
+      action: "lexxy:change->typewriter#typed mousemove@window->typewriter#rest submit->typewriter#submit outbox:queued->typewriter#queued beforeunload@window->typewriter#confirmLeaving turbo:before-visit@document->typewriter#confirmLeaving selectionchange@document->typewriter#selectionChanged"
     } do |form| %>
   <div class="page page--typescript">
     <div class="page__content">
@@ -22,9 +22,21 @@
     </div>
   </div>
 
+  <div class="format-bar" role="toolbar" aria-label="Format" hidden data-typewriter-target="formatBar">
+    <button type="button" class="format-bar__button" aria-label="Bold" aria-pressed="false" data-typewriter-target="formatButton"
+            data-action="pointerdown->typewriter#formatSelection:prevent" data-typewriter-format-param="bold"><b>B</b></button>
+    <button type="button" class="format-bar__button" aria-label="Italic" aria-pressed="false" data-typewriter-target="formatButton"
+            data-action="pointerdown->typewriter#formatSelection:prevent" data-typewriter-format-param="italic"><i>I</i></button>
+    <button type="button" class="format-bar__button" aria-label="Strikethrough" aria-pressed="false" data-typewriter-target="formatButton"
+            data-action="pointerdown->typewriter#formatSelection:prevent" data-typewriter-format-param="strikethrough"><s>S</s></button>
+  </div>
+
   <footer class="typewriter__footer">
-    <p class="typewriter__keys">
-      <kbd>Ctrl B</kbd> bold <kbd>Ctrl I</kbd> italic <kbd>Ctrl U</kbd> underline <kbd>#</kbd> heading <kbd>-</kbd> list
+    <p class="typewriter__keys typewriter__keys--keyboard">
+      <kbd>Ctrl B</kbd> bold <kbd>Ctrl I</kbd> italic <kbd>Ctrl U</kbd> underline <kbd>Ctrl Shift X</kbd> strike <kbd>#</kbd> heading <kbd>-</kbd> list
+    </p>
+    <p class="typewriter__keys typewriter__keys--touch">
+      Select words to format <kbd>#</kbd> heading <kbd>-</kbd> list
     </p>
 
     <div class="typewriter__actions">

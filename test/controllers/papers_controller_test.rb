@@ -64,6 +64,13 @@ class PapersControllerTest < ActionDispatch::IntegrationTest
     assert_select ".page__errors"
   end
 
+  test "strikethrough survives saving" do
+    post papers_path, params: { draft: { title: "Struck", body: "<p>Keep <s>cut this</s>.</p>" } }
+    follow_redirect!
+
+    assert_select ".page__body s", text: "cut this"
+  end
+
   test "underline survives sanitizing" do
     get paper_path(papers(:essay))
 

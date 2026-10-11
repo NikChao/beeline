@@ -51,6 +51,47 @@ class TypewriterTest < ApplicationSystemTestCase
     assert_selector ".page__body u", text: "under"
   end
 
+  test "strike words through with Ctrl Shift X" do
+    visit new_paper_path
+    fill_in "Title", with: "Struck"
+
+    body = find(".lexxy-editor__content")
+    body.click
+    body.send_keys "keep cut"
+    3.times { body.send_keys [ :shift, :left ] }
+    assert_selected "cut"
+    body.send_keys [ :control, :shift, "x" ]
+
+    assert_selector ".lexxy-editor__content", text: "keep cut" # not cut out
+    assert_selector ".lexxy-editor__content .lexxy-content__strikethrough", text: "cut"
+
+    click_on "Save as draft"
+    assert_selector ".page__body s", text: "cut"
+  end
+
+  test "on a touch screen, selected words get a format bar" do
+    visit new_paper_path
+    execute_script "const real = window.matchMedia.bind(window); window.matchMedia = query => query.includes('coarse') ? { matches: true } : real(query)"
+    fill_in "Title", with: "Touch"
+
+    body = find(".lexxy-editor__content")
+    body.click
+    body.send_keys "one two"
+    assert_no_selector ".format-bar"
+
+    3.times { body.send_keys [ :shift, :left ] }
+    assert_selected "two"
+    assert_selector ".format-bar"
+
+    find(".format-bar__button[aria-label=Strikethrough]").click
+    assert_selector ".lexxy-editor__content .lexxy-content__strikethrough", text: "two"
+    assert_selector ".format-bar__button[aria-label=Strikethrough][aria-pressed=true]"
+    assert_selected "two" # the selection stays put
+
+    body.send_keys :right
+    assert_no_selector ".format-bar"
+  end
+
   test "markdown beyond headings and bullets stays prose" do
     visit new_paper_path
     fill_in "Title", with: "Plain"

@@ -22,10 +22,11 @@ const OVERWRITING_COMMANDS = [
 
 const COMPOSING_INPUTS = [ "deleteCompositionText", "insertCompositionText", "insertFromComposition" ]
 const HOTKEY_FORMATS = { b: "bold", i: "italic", u: "underline" }
-const UNSUPPORTED_FORMATS = [ "code", "strikethrough", "highlight", "subscript", "superscript" ]
+const UNSUPPORTED_FORMATS = [ "code", "highlight", "subscript", "superscript" ]
+const BAR_FORMATS = [ "bold", "italic", "strikethrough" ]
 
 export default class extends Controller {
-  static targets = [ "editor", "title", "author", "notice" ]
+  static targets = [ "editor", "title", "author", "notice", "formatBar", "formatButton" ]
 
   connect() {
     if (this.editorTarget.editor) {
@@ -45,7 +46,12 @@ export default class extends Controller {
     const key = event.key.toLowerCase()
     const shortcut = event.metaKey || event.ctrlKey
 
-    if (key === "backspace" || key === "delete" || (shortcut && [ "x", "y", "z" ].includes(key))) {
+    if (shortcut && event.shiftKey && !event.altKey && key === "x") {
+      // Ctrl/⌘ Shift X strikes through: checked before ⌘X, which would cut.
+      event.preventDefault()
+      event.stopPropagation()
+      this.#format("strikethrough")
+    } else if (key === "backspace" || key === "delete" || (shortcut && [ "x", "y", "z" ].includes(key))) {
       this.#refuse(event)
     } else if (event.ctrlKey && !event.metaKey && !event.altKey && !event.shiftKey && HOTKEY_FORMATS[key]) {
       // Ctrl+B/I/U everywhere, including macOS where Lexical only listens for ⌘.
@@ -66,6 +72,30 @@ export default class extends Controller {
 
   refuse(event) {
     this.#refuse(event)
+  }
+
+  // The format bar: on touch screens, selecting words offers bold, italic and
+  // strikethrough. It sits under the selection, clear of the system's own menu.
+
+  selectionChanged() {
+    if (!this.hasFormatBarTarget) return
+
+    const selection = window.getSelection()
+    const content = this.editorTarget.querySelector(".lexxy-editor__content")
+    const selecting = matchMedia("(pointer: coarse)").matches && selection.rangeCount && !selection.isCollapsed &&
+      content?.contains(selection.anchorNode) && content.contains(selection.focusNode)
+
+    if (selecting) {
+      this.#showFormatBar(selection.getRangeAt(0).getBoundingClientRect())
+    } else {
+      this.formatBarTarget.hidden = true
+    }
+  }
+
+  // On pointerdown, with the default prevented, so the selection stays put.
+  formatSelection({ params: { format } }) {
+    this.#format(format)
+    requestAnimationFrame(() => this.#reflectFormats())
   }
 
   typed() {
@@ -203,6 +233,29 @@ export default class extends Controller {
       const selection = $createRangeSelectionFromDom(window.getSelection(), editor)
       if (selection) $setSelection(selection)
       editor.dispatchCommand(FORMAT_TEXT_COMMAND, format)
+    })
+  }
+
+  #showFormatBar(rect) {
+    const bar = this.formatBarTarget
+    bar.hidden = false
+
+    const margin = 8
+    const left = rect.left + rect.width / 2 - bar.offsetWidth / 2
+    bar.style.left = `${Math.min(Math.max(left, margin), document.documentElement.clientWidth - bar.offsetWidth - margin) + window.scrollX}px`
+    bar.style.top = `${rect.bottom + window.scrollY + 12}px`
+
+    this.#reflectFormats()
+  }
+
+  #reflectFormats() {
+    const active = this.editorTarget.editor.getEditorState().read(() => {
+      const selection = $getSelection()
+      return $isRangeSelection(selection) ? BAR_FORMATS.filter(format => selection.hasFormat(format)) : []
+    })
+
+    this.formatButtonTargets.forEach(button => {
+      button.setAttribute("aria-pressed", active.includes(button.dataset.typewriterFormatParam))
     })
   }
 
