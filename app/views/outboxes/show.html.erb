@@ -18,7 +18,13 @@
       <div class="listing__link">
         <span class="listing__title" data-field="title"></span>
         <span class="listing__meta" data-field="meta"></span>
-        <p class="outbox__text" data-field="text" hidden></p>
+        <article class="page page--typescript outbox__page" data-field="page" hidden>
+          <div class="page__content">
+            <h2 class="page__title" data-field="page-title"></h2>
+            <p class="page__author" data-field="author"></p>
+            <div class="page__body" data-field="body"></div>
+          </div>
+        </article>
         <button type="button" class="button button--quiet outbox__discard" data-field="discard" data-action="outbox#discard" hidden>Discard</button>
       </div>
     </li>

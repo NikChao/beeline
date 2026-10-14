@@ -36,9 +36,13 @@ export default class extends Controller {
       ? `${label} · the server refused it (${item.status}). Your words are below, so you can copy them.`
       : `${label} · saved on this device ${saved}, waiting to sync`
 
-    const html = item.contentType.includes("json") ? "" : new URLSearchParams(item.body).get("draft[body]") || ""
-    field("text").textContent = new DOMParser().parseFromString(html, "text/html").body.innerText
-    field("text").hidden = !html
+    // A page waiting to sync reads as it will once it's on the desk.
+    const params = item.contentType.includes("json") ? new URLSearchParams() : new URLSearchParams(item.body)
+    const html = params.get("draft[body]") || ""
+    field("page-title").textContent = params.get("draft[title]") || "Untitled"
+    field("author").textContent = params.get("draft[author]") || ""
+    field("body").replaceChildren(...sanitized(html))
+    field("page").hidden = !html
     element.id = `entry-${item.id}`
 
     if (item.failed) {
@@ -48,4 +52,18 @@ export default class extends Controller {
 
     return element
   }
+}
+
+// What was typed, without anything that could run.
+function sanitized(html) {
+  const { body } = new DOMParser().parseFromString(html, "text/html")
+
+  body.querySelectorAll("script, style, iframe, object, embed, link, meta, form").forEach(element => element.remove())
+  body.querySelectorAll("*").forEach(element => {
+    for (const { name, value } of [ ...element.attributes ]) {
+      if (name.startsWith("on") || /^\s*javascript:/i.test(value)) element.removeAttribute(name)
+    }
+  })
+
+  return [ ...body.childNodes ]
 }

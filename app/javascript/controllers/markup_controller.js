@@ -1,7 +1,7 @@
 import { Controller } from "@hotwired/stimulus"
 import { enqueue, flush } from "lib/outbox"
+import { draw, pathData } from "lib/marks"
 
-const SVG = "http://www.w3.org/2000/svg"
 const TOOL_KEYS = { m: "line", p: "stroke", w: "word" }
 const COLOR_KEYS = { 1: "red", 2: "green", 3: "yellow" }
 
@@ -150,23 +150,8 @@ export default class extends Controller {
     requestAnimationFrame(() => input.focus())
   }
 
-  #draw({ kind, color, points, text }) {
-    let element
-
-    if (kind === "word") {
-      element = document.createElementNS(SVG, "text")
-      element.setAttribute("x", points[0][0])
-      element.setAttribute("y", points[0][1])
-      element.setAttribute("dominant-baseline", "central")
-      element.textContent = text
-    } else {
-      element = document.createElementNS(SVG, "path")
-      element.setAttribute("d", pathData(points))
-    }
-
-    element.setAttribute("class", `mark mark--${kind} mark--${color}`)
-    this.canvasTarget.append(element)
-    return element
+  #draw(mark) {
+    return draw(this.canvasTarget, mark)
   }
 
   // Marks go to the outbox like everything else. One that went straight
@@ -179,12 +164,14 @@ export default class extends Controller {
       body: JSON.stringify({ mark: { ...mark, points: mark.points.flat() } }),
       kind: "mark"
     })
+    element.dataset.outboxId = entry.id
 
     let sent = await flush()
     if (!sent.has(entry.id)) sent = await flush()
 
     const response = sent.get(entry.id)
     if (response) {
+      delete element.dataset.outboxId
       element.dataset.markId = (await response.json()).id
       this.made.push(element)
     }
@@ -199,10 +186,6 @@ export default class extends Controller {
   get #headers() {
     return { "X-CSRF-Token": document.querySelector("meta[name=csrf-token]")?.content }
   }
-}
-
-function pathData(points) {
-  return points.map(([ x, y ], index) => `${index ? "L" : "M"}${x} ${y}`).join(" ")
 }
 
 function round(number) {

@@ -9,7 +9,9 @@
     <div class="page__body"><%= draft.body %></div>
   </div>
 
-  <svg class="marks" viewBox="0 0 1000 1000" aria-hidden="true" <%= tag.attributes(data: { markup_target: ("canvas" if markup) }) %>>
+  <svg class="marks" viewBox="0 0 1000 1000" aria-hidden="true" <%= tag.attributes(data: {
+      controller: "marks", marks_url_value: paper_draft_marks_path(draft.paper, draft), markup_target: ("canvas" if markup)
+    }) %>>
     <%= render partial: "marks/mark", collection: draft.marks %>
   </svg>
 </article>

@@ -32,15 +32,42 @@ class OfflineTest < ApplicationSystemTestCase
     lose_the_host
 
     fill_in "Title", with: "Desk bound"
-    type "Not yet."
+    type "- Not yet."
     click_on "Save as draft"
 
     assert_selector ".listing__heading", text: "On your desk"
     assert_selector ".listing__item--pending .listing__meta", text: "New page · waiting to sync"
 
+    # It reads as a page, formatting and all, until the server has it.
     click_on "Desk bound"
     assert_selector ".listing__heading", text: "Outbox"
-    assert_selector ".outbox__text", text: "Not yet."
+    assert_selector ".outbox__page .page__title", text: "Desk bound"
+    assert_selector ".outbox__page .page__body ul li", text: "Not yet."
+  end
+
+  test "marks made without the host stay on the page wherever it's shown" do
+    draft = drafts(:letter_second)
+    visit paper_draft_path(papers(:letter), draft)
+    lose_the_host
+
+    page_box = find(".page")
+    draw page_box, from: [ 120, 300 ], to: [ 400, 300 ]
+    assert_selector "svg.marks path.mark--line"
+    assert_selector ".sync-status", text: "1 waiting to sync"
+
+    # Away and back: the page as served doesn't have it, the outbox does.
+    execute_script "Turbo.visit(#{papers_path.to_json})"
+    assert_selector ".listing"
+    execute_script "Turbo.visit(#{paper_draft_path(papers(:letter), draft).to_json})"
+    assert_selector ".page__title", text: draft.title
+    assert_selector "svg.marks path.mark--line", count: 1
+
+    click_on "Write draft 3"
+    click_on "Beside draft 2"
+    assert_selector ".desk__page--previous svg.marks path.mark--line", count: 1
+
+    find_the_host
+    Timeout.timeout(Capybara.default_max_wait_time) { sleep 0.05 until draft.marks.count == 1 }
   end
 
   test "what's being typed is kept on this device" do
@@ -77,6 +104,19 @@ class OfflineTest < ApplicationSystemTestCase
         window.fetch = (input, init = {}) =>
           (init.method || "GET").toUpperCase() === "POST" ? Promise.reject(new TypeError("Load failed")) : window.realFetch(input, init)
       JS
+    end
+
+    def draw(element, from:, to:)
+      page.driver.browser.action
+        .move_to(element.native, *offset(element, from)).click_and_hold
+        .move_to(element.native, *offset(element, from.zip(to).map { |a, b| (a + b) / 2 }))
+        .move_to(element.native, *offset(element, to)).release.perform
+    end
+
+    # Selenium offsets are from the element's center.
+    def offset(element, (x, y))
+      rect = element.native.rect
+      [ (x - rect.width / 2).round, (y - rect.height / 2).round ]
     end
 
     def find_the_host

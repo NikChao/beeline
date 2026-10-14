@@ -1057,14 +1057,12 @@ input.page__author::placeholder {
   color: var(--ink-soft);
 }
 
-.outbox__text {
-  margin: 0.75rem 0 0;
-  padding: 1rem 1.25rem;
-  background: var(--paper);
-  font-family: var(--typescript);
-  font-size: 0.9rem;
-  white-space: pre-wrap;
-  user-select: all;
+.outbox__page {
+  margin-top: 0.75rem;
+
+  &[hidden] {
+    display: none;
+  }
 }
 
 .outbox__discard {
